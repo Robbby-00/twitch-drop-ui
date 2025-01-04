@@ -1,0 +1,58 @@
+.button {
+    --background-button-rgb: var(--primary-rgb);
+
+    height: 38px;
+    padding: 0 24px;
+
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    cursor: pointer;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+
+    will-change: opacity, background-color, box-shadow, color, border;
+    transition: opacity .2s ease, background-color .2s ease, box-shadow .2s ease, color .2s ease, border .2s ease;
+}
+
+.button > svg {
+    height: 50%;
+}
+
+.button[data-disable="true"] {
+    pointer-events: none;
+    opacity: .4;
+}
+
+/*
+    FILL STYLE
+*/
+.button.fill {
+    background-color: rgba(var(--background-button-rgb), .75);
+    border: 2px solid transparent;
+}
+
+.button.fill:hover {
+    background-color: rgba(var(--background-button-rgb), .9);
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+}
+
+/*
+    EMPTY STYLE
+*/
+.button.empty {
+    color: rgba(var(--font-rgb), .8);
+    background-color: rgba(var(--background-button-rgb), 0);
+    border: 2px solid rgba(var(--background-button-rgb), .6);
+}
+
+.button.empty:hover {
+    border: 2px solid rgba(var(--background-button-rgb), .75);
+    background-color: rgba(var(--background-button-rgb), .05);
+    color: rgba(var(--font-rgb), 1);
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+}

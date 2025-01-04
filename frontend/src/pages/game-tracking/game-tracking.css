@@ -1,0 +1,68 @@
+.container-page {
+    width: 100%;
+    height: calc(100% - 128px);
+
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/*
+    HEAD
+*/
+.container-page > .head {
+    width: 100%;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.container-page > .head > .container-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+}
+
+.container-page > .head > .container-title > .title {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: .4px;
+}
+
+.container-page > .head  > .action {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+}
+
+/*
+    GAMES
+*/
+.container-page > .games {
+    width: 100%;
+    height: max-content;
+    padding: 24px 0;
+
+    overflow-y: scroll;
+}
+
+.container-page > .games::-webkit-scrollbar {
+    display: none;
+}
+
+.container-page > .games > div:not(:last-child) {
+    margin-bottom: 18px;
+}
+
+.container-page > .games > .empty {
+    padding: 32px 0;
+
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: .4px;
+    opacity: .3;
+}

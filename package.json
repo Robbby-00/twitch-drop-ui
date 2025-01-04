@@ -1,0 +1,43 @@
+{
+    "name": "twitch-drop-ui",
+    "version": "1.0.0",
+    "main": "src/build/index.js",
+    "scripts": {
+        "clean": "rimraf ./build",
+        "build": "npm run clean && tsc && cd frontend && npm run build && cd ..",
+        "dev": "dotenvx run --env-file=.env -- ts-node src",
+        "dev:watch": "nodemon -e ts,json --exec npm run dev",
+        "dev:ui": "cd frontend && npm run start",
+        "dev:ui:watch": "concurrently -k \"npm run dev:ui\" \"npm run dev:watch\"",
+        "build:start": "concurrently -k \"node frontend/serve.js\" \"node build/src/index.js\"",
+        "build:start:dev": "dotenvx run --env-file=.env -- npm run build:start"
+    },
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "devDependencies": {
+        "@dotenvx/dotenvx": "^1.31.0",
+        "@types/node": "^22.10.2",
+        "concurrently": "^9.1.0",
+        "nodemon": "^3.1.9",
+        "rimraf": "^6.0.1",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.7.2"
+    },
+    "dependencies": {
+        "@types/hls-parser": "^0.8.7",
+        "@types/puppeteer": "^5.4.7",
+        "@types/selenium-webdriver": "^4.1.27",
+        "async-mutex": "^0.5.0",
+        "axios": "^1.7.9",
+        "dayjs": "^1.11.13",
+        "express": "^4.21.2",
+        "hls-parser": "^0.13.5",
+        "puppeteer": "^23.11.1",
+        "puppeteer-extra": "^3.3.6",
+        "puppeteer-extra-plugin-adblocker": "^2.13.6",
+        "puppeteer-extra-plugin-stealth": "^2.11.2",
+        "selenium-webdriver": "^4.27.0",
+        "typescript-node-express": "^1.0.3"
+    }
+}

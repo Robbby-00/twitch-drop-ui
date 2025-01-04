@@ -1,0 +1,66 @@
+.container-tracked-game {
+    width: calc(98% - 64px);
+    height: 96px;
+    padding: 12px 32px;
+    margin: 0 1%;
+    
+    background-color: rgba(var(--font-rgb), .1);
+    border-radius: 8px;
+
+    display: flex;
+    flex-shrink: 0;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/*
+    INFO
+*/
+.container-tracked-game > .info {
+    height: 100%;
+    flex: 1;
+
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 32px;
+}
+
+.container-tracked-game > .info > img {
+    height: 90%;
+    border-radius: 8px;
+}
+
+.container-tracked-game > .info > .container-data {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.container-tracked-game > .info > .container-data > .name {
+    display: flex;
+    gap: 12px;
+
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: .8px;
+}
+
+/*
+    EDIT MODE
+*/
+.container-tracked-game > .edits-button {
+    display: flex;
+    gap: 12px;
+}
+
+.container-tracked-game > .edits-button > .button {
+    padding: 0 16px;
+    color: rgba(var(--background-button-rgb), .8);
+}
+
+.container-tracked-game > .edits-button > .button.remove {
+    --background-button-rgb: var(--red-rgb);
+}

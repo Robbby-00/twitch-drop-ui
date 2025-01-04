@@ -1,0 +1,82 @@
+.container-game {
+    width: calc(100% - 48px);
+    height: 72px;
+    padding: 8px 24px;
+    
+    background-color: rgba(var(--font-rgb), .1);
+    border-radius: 8px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/*
+    INFO
+*/
+.container-game > .info {
+    height: 100%;
+    flex: 1;
+
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 24px;
+}
+
+.container-game > .info > img {
+    height: 85%;
+    border-radius: 4px;
+}
+
+.container-game > .info > .name {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: .4px;
+    text-transform: capitalize;
+}
+
+/*
+    ADD CHANNELS
+*/
+.container-game > .add-button {
+    padding: 6px 8px;
+    background-color: rgba(var(--primary-rgb), 0);
+    border: solid 2px var(--primary-hex);
+    border-radius: 4px;
+    cursor: pointer;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    will-change: background-color, opacity;
+    transition: background-color .2s ease, opacity .2s ease;
+}
+
+.container-game > .add-button:hover {
+    background-color: rgba(var(--primary-rgb), .2);
+}
+
+.container-game > .add-button[data-istrack="true"] {
+    background-color: var(--primary-hex);
+}
+
+.container-game > .add-button[data-istrack="true"]:hover {
+    opacity: .85;
+}
+
+.container-game > .add-button > .icon {
+    height: 14px;
+
+    will-change: transform;
+    transition: transform .2s ease;
+}
+
+.container-game > .add-button > .icon * {
+    fill: var(--font-hex) !important;
+}
+
+.container-game > .add-button:hover > .icon {
+    transform: scale(1.15);
+}

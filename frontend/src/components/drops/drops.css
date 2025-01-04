@@ -1,0 +1,127 @@
+.container-drop {
+    position: relative;
+    width: 160px;
+    aspect-ratio: 8 / 9;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    background-color: var(--background-base-hex);
+    border-radius: 12px;
+    border: 1px solid rgba(var(--font-rgb), .15);
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    overflow: hidden;
+}
+
+/*
+    TAG
+*/
+
+.container-drop > .container-claimed-tick,
+.container-drop > .container-remaining-time {
+    z-index: 1;
+    position: absolute;
+    top: 8px;
+    right: 6px;
+    padding: 8px 9px;
+
+    font-size: 12px;
+    color: rgba(var(--font-rgb), .7);
+    letter-spacing: .4px;
+    background-color: var(--background-base-hex);
+    border-radius: 8px;
+    opacity: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+
+    will-change: opacity;
+    transition: opacity .2s ease;
+}
+
+.container-drop > .container-claimed-tick {
+    color: rgba(var(--green-rgb), .7);
+}
+
+.container-drop:hover > .container-claimed-tick,
+.container-drop:hover > .container-remaining-time {
+    opacity: 1;
+}
+
+/*
+    IMAGE
+*/
+.container-drop > .container-image {
+    position: relative;
+    width: 100%;
+    flex: 1;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,1) 50%, rgba(0,0,0,.5) 50%);
+    -webkit-mask-size: 200% 100%;
+    -webkit-mask-position-x: calc(100% - var(--progress));
+    background-color: rgba(var(--font-rgb), .05);
+
+    will-change: -webkit-mask-position-x;
+    transition: -webkit-mask-position-x .5s ease;
+}
+
+.container-drop[data-claimed="true"] > .container-image {
+    opacity: 1;
+}
+
+.container-drop > .container-image > img {
+    width: 64px;
+    aspect-ratio: 1 / 1;
+}
+
+
+/*
+    TEXT
+*/
+.container-drop > .name {
+    padding: 8px 12px;
+    width: calc(100% - 24px);
+    height: 40px;
+
+    text-align: center;
+    font-size: 14px;
+    letter-spacing: .4px;
+    line-height: 18px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/*
+    PROGRESS BAR
+*/
+.container-drop > .progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+
+    height: 5px;
+    width: 100%;
+    background-color: rgba(var(--font-rgb), .05);
+}
+
+.container-drop > .progress-bar > .bar {
+    height: 100%;
+    width: var(--progress);
+
+    background-color: var(--primary-hex);
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+
+    will-change: width;
+    transition: width .5s ease;
+}

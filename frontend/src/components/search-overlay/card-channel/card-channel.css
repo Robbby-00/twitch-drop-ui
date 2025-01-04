@@ -1,0 +1,81 @@
+.container-channel {
+    width: calc(100% - 48px);
+    height: 60px;
+    padding: 12px 24px;
+    
+    background-color: rgba(var(--font-rgb), .1);
+    border-radius: 8px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/*
+    INFO
+*/
+.container-channel > .info {
+    flex: 1;
+
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 24px;
+}
+
+.container-channel > .info > .profile-image {
+    width: 48px;
+    height: 48px;
+}
+
+.container-channel > .info > .name {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: .4px;
+    text-transform: capitalize;
+}
+
+/*
+    ADD CHANNELS
+*/
+.container-channel > .add-button {
+    padding: 6px 8px;
+    background-color: rgba(var(--primary-rgb), 0);
+    border: solid 2px var(--primary-hex);
+    border-radius: 4px;
+    cursor: pointer;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    will-change: background-color, opacity;
+    transition: background-color .2s ease, opacity .2s ease;
+}
+
+.container-channel > .add-button:hover {
+    background-color: rgba(var(--primary-rgb), .2);
+}
+
+.container-channel > .add-button[data-istrack="true"] {
+    background-color: var(--primary-hex);
+}
+
+.container-channel > .add-button[data-istrack="true"]:hover {
+    opacity: .85;
+}
+
+.container-channel > .add-button > .icon {
+    height: 14px;
+
+    will-change: transform;
+    transition: transform .2s ease;
+}
+
+.container-channel > .add-button > .icon * {
+    fill: var(--font-hex) !important;
+}
+
+.container-channel > .add-button:hover > .icon {
+    transform: scale(1.15);
+}

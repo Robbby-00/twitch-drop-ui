@@ -1,0 +1,131 @@
+.container-tracked-channel {
+    width: calc(98% - 64px);
+    height: 80px;
+    padding: 12px 32px;
+    margin: 0 1%;
+    
+    background-color: rgba(var(--font-rgb), .1);
+    border-radius: 8px;
+
+    display: flex;
+    flex-shrink: 0;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/*
+    INFO
+*/
+.container-tracked-channel > .info {
+    flex: 1;
+
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 32px;
+}
+
+.container-tracked-channel > .info > .profile-image {
+    width: 60px;
+    height: 60px;
+}
+
+.container-tracked-channel > .info > .container-data {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.container-tracked-channel > .info > .container-data > .name {
+    display: flex;
+    gap: 12px;
+
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: .8px;
+}
+
+.container-tracked-channel > .info > .container-data > .name svg {
+    color: var(--primary-hex);
+}
+
+.container-tracked-channel > .info > .container-data > .tags {
+    display: flex;
+    align-items: center;
+}
+
+.container-tracked-channel > .info > .container-data > .tags > div {
+    display: flex;
+    align-items: center;
+
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: .4px;
+}
+
+.container-tracked-channel > .info > .container-data > .tags > div > :nth-child(2) {
+    margin-left: 6px;
+}
+
+.container-tracked-channel > .info > .container-data > .tags > div > svg {
+    height: 12px;
+}
+
+.container-tracked-channel > .info > .container-data > .tags > div:not(:last-child)::after {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 4px;
+    margin: 0 12px;
+
+    background-color: rgba(var(--font-rgb), .25);
+    border-radius: 64px;
+}
+
+.container-tracked-channel > .info > .container-data > .tags > .viewer {
+    color: var(--red-hex);
+}
+
+/*
+    POINTS
+*/
+.container-tracked-channel > .points {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+}
+
+.container-tracked-channel > .points > span {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.container-tracked-channel > .points > img {
+    height: 32px;
+}
+
+.container-tracked-channel > .points > svg {
+    fill: var(--primary-hex);
+    height: 32px;
+}
+
+/*
+    EDIT MODE
+*/
+.container-tracked-channel > .edits-button {
+    display: flex;
+    gap: 12px;
+}
+
+.container-tracked-channel > .edits-button > .button {
+    padding: 0 16px;
+    color: rgba(var(--background-button-rgb), .8);
+}
+
+.container-tracked-channel > .edits-button > .button.remove {
+    --background-button-rgb: var(--red-rgb);
+}

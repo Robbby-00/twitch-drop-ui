@@ -1,0 +1,109 @@
+.container-header {
+    width: calc(100% - 64px);
+    height: 80px;
+    padding: 0 32px;
+
+    display: flex;
+    flex-shrink: 0;
+    justify-content: space-between;
+    align-items: center;
+
+    background-color: var(--background-soft-hex);
+    border-radius: 12px;
+}
+
+.container-header > .left-side {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 36px;
+}
+
+/*
+    LOGO
+*/
+.container-header > .left-side > a {
+    width: 48px;
+    height: 48px;
+}
+
+.container-header > .left-side > a > .logo {
+    width: 100%;
+    height: 100%;
+}
+
+
+/* 
+    SECTIONS
+*/
+.container-header > .left-side > .sections {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 48px;
+
+    font-weight: 700;
+    letter-spacing: .6px;
+}
+
+.container-header > .left-side > .sections > .section {
+    position: relative;
+    cursor: pointer;
+    opacity: .5;
+
+    will-change: opacity;
+    transition: opacity .2s ease;
+}
+
+.container-header > .left-side > .sections > .section:hover {
+    opacity: .7;
+}
+
+.container-header > .left-side > .sections > .section[data-selected="true"] {
+    opacity: 1;
+}
+
+/*
+    SECTION UNDERLINE
+*/
+.container-header > .left-side > .sections > .section::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    width: 0px;
+    height: 3px;
+    background-color: var(--primary-hex);
+    border-radius: 3px;
+
+    will-change: width;
+    transition: width .3s ease;
+}
+
+.container-header > .left-side > .sections > .section[data-selected="true"]::after {
+    width: 80%;
+}
+
+.container-header > .left-side > .sections > .section[data-selected="true"]:hover::after {
+    width: 90%;
+}
+
+/*
+    PROFILE
+*/
+.container-header > .user-account {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+
+    font-weight: 600;
+    letter-spacing: .6px;
+}
+
+.container-header > .user-account > img {
+    height: 36px;
+    border-radius: 36px;
+}
