@@ -37,7 +37,7 @@ The data can be provided either through the **.env** file in the root folder or 
 
 ## Installation
 
-## Picture
+## Pictures
 
 ![ChannelPoint](https://github.com/user-attachments/assets/f096ffd4-f16a-4602-97cf-37bd9dfcf104)
 ![CampaignDrop](https://github.com/user-attachments/assets/b9ad4a37-dd54-4612-8bd1-445a44f4561d)
