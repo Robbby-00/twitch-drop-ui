@@ -5,13 +5,14 @@
     "scripts": {
         "clean": "rimraf ./build",
         "build": "npm run clean && tsc && cd frontend && npm run build && cd ..",
+        "build:start": "concurrently -k \"node frontend/serve.js\" \"node build/src/index.js\"",
+        "build:start:env": "dotenvx run --env-file=.env -- npm run build:start",
+        "production": "node updater.js && npm run build:start:env",
+        "release": "node _dev/release.js",
         "dev": "dotenvx run --env-file=.env -- ts-node src",
         "dev:watch": "nodemon -e ts,json --exec npm run dev",
         "dev:ui": "cd frontend && npm run start",
-        "dev:ui:watch": "concurrently -k \"npm run dev:ui\" \"npm run dev:watch\"",
-        "build:start": "concurrently -k \"node frontend/serve.js\" \"node build/src/index.js\"",
-        "build:start:dev": "dotenvx run --env-file=.env -- npm run build:start",
-        "release": "node _dev/release.js"
+        "dev:ui:watch": "concurrently -k \"npm run dev:ui\" \"npm run dev:watch\""
     },
     "author": "",
     "license": "ISC",
@@ -42,6 +43,7 @@
         "puppeteer-extra-plugin-stealth": "^2.11.2",
         "read-pkg": "^9.0.1",
         "selenium-webdriver": "^4.27.0",
-        "typescript-node-express": "^1.0.3"
+        "typescript-node-express": "^1.0.3",
+        "unzipper": "^0.12.3"
     }
 }
