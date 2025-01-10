@@ -1,8 +1,8 @@
 const { default: axios } = require("axios");
-const { readFileSync, createWriteStream, existsSync, unlinkSync, rmSync, dirname } = require("fs");
+const { readFileSync, createWriteStream, existsSync, mkdirSync, unlinkSync, rmSync } = require("fs");
+const { dirname } = require("path");
 const unzipper = require("unzipper");
 const { spawn } = require("node:child_process");
-const { mkdirSync } = require("node:fs");
 
 function getCurrentVersion() {
     try {
