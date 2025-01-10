@@ -30,10 +30,10 @@ export const MAX_INTEGRITY_RETRY = 3
 // Browser
 export const PATH_USERFILE = join(STORAGE_DIR, './user_data')
 export const CHROME_BINARY = process.env.CHROME_BINARY ?? executablePath()
-export const HEADLESS = process.env.HEADLESS ? Boolean(process.env.HEADLESS) : true
-export const STEALTH_MODE = process.env.STEALTH_MODE ? Boolean(process.env.STEALTH_MODE) : true
-export const BLOCK_TRACKER = process.env.BLOCK_TRACKER ? Boolean(process.env.BLOCK_TRACKER) : true
-export const BROWSER_TEST = process.env.BROWSER_TEST ? Boolean(process.env.BROWSER_TEST) : false
+export const HEADLESS = process.env.HEADLESS ? process.env.HEADLESS.toLowerCase() === 'true' : true
+export const STEALTH_MODE = process.env.STEALTH_MODE ? process.env.STEALTH_MODE.toLowerCase() === 'true' : true
+export const BLOCK_TRACKER = process.env.BLOCK_TRACKER ? process.env.BLOCK_TRACKER.toLowerCase() === 'true' : true
+export const BROWSER_TEST = process.env.BROWSER_TEST ? process.env.BROWSER_TEST.toLowerCase() === 'true' : false
 
 if (ACCESS_TOKEN === undefined) {
     throw new Error("Missing access token!")

@@ -45,52 +45,14 @@ export class BrowserInstance {
         })
     }
 
-    private static async getUndetectedPage(browser: Browser): Promise<Page> {
-        const page = (await browser.pages())[0]
-        await this._timeout(1000)
+    private static async getPage(browser: Browser): Promise<Page> {
+        const pages = await browser.pages()
 
-        const cdpSession = await page.createCDPSession();
-
-        // User Agent
-        const versionExt = await browser.version()
-        const version = versionExt.split("/")[1]
-        const userAgent = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) ${versionExt} Safari/537.36`
+        if (pages.length > 0) {
+            return pages[0]
+        }
         
-        let overrideUserAgent = cdpSession.send('Network.setUserAgentOverride', {
-                userAgent: userAgent,
-                userAgentMetadata: {
-                brands: [
-                    { brand: 'Google Chrome', version: version.split(".")[0] },
-                    { brand: 'Chromium', version: version.split(".")[0] },
-                    { brand: 'Not_A Brand', version: '24' },
-                ],
-                fullVersionList: [
-                    { brand: 'Google Chrome', version: version },
-                    { brand: 'Chromium', version: version },
-                    { brand: 'Not_A Brand', version: '24.0.0.0' },
-                ],
-                platform: 'Windows',
-                platformVersion: '10.0',
-                architecture: 'x86',
-                fullVersion: version,
-                model: '',
-                mobile: false
-            },
-        });
-
-        let extraHeader = page.setExtraHTTPHeaders({
-            "Accept-Language": 'en-US,en;q=0.9',
-            "Sec-Ch-Ua": '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
-            "Sec-Ch-Ua-Mobile": '?0',
-            "Sec-Ch-Ua-Platform": '"Windows"',
-            "Sec-Fetch-Dest": 'empty',
-            "Sec-Fetch-Mode": 'cors',
-            "Sec-Fetch-Site": 'same-site'
-        })
-
-        await Promise.all([overrideUserAgent, extraHeader])
-
-        return page
+        return await browser.newPage()
     }
 
     private static createCookie(name: string, value: string): Cookie {
@@ -123,7 +85,7 @@ export class BrowserInstance {
                     browser.setCookie(this.createCookie("unique_id_durable", AuthUser.deviceId))
                 }
         
-                const page = await this.getUndetectedPage(browser)
+                const page = await this.getPage(browser)
                 
                 page.on('response', resp => {
                     if (resp.url() === "https://gql.twitch.tv/integrity") {
@@ -167,8 +129,8 @@ export class BrowserInstance {
     public static async test(): Promise<void> {
         const browser = await this.launch(AuthUser.clientInfo.userAgent)
 
-        const page = await this.getUndetectedPage(browser)
-        // await page.goto("https://deviceandbrowserinfo.com/are_you_a_bot")
+        const page = await this.getPage(browser)
+        await page.goto("https://deviceandbrowserinfo.com/are_you_a_bot")
         // await page.goto("https://hmaker.github.io/selenium-detector/");
         // await page.goto("https://bot-detector.rebrowser.net/");
         // await page.goto("https://www.browserscan.net/bot-detection");
