@@ -1,8 +1,7 @@
-import puppeteer, { Browser, Cookie, Page } from 'puppeteer-core'
+import puppeteer, { Browser, Cookie, Page } from 'puppeteer'
 import puppeteerExtra from "puppeteer-extra"
 import StealthPlugin from "puppeteer-extra-plugin-stealth"
 import AdBlockerPlugin from "puppeteer-extra-plugin-adblocker"
-import { executablePath } from 'puppeteer'
 
 // components
 import { AuthUser } from "../twitch/auth"
@@ -11,16 +10,20 @@ import { AuthUser } from "../twitch/auth"
 import { IIntegrityToken } from "./@types"
 
 // @constant
-import { CHROME_BINARY, PATH_USERFILE } from '../constant'
+import { CHROME_BINARY, PATH_USERFILE, HEADLESS, STEALTH_MODE, BLOCK_TRACKER } from '../constant'
 
-puppeteerExtra.use(StealthPlugin())
-puppeteerExtra.use(AdBlockerPlugin({ blockTrackers: true }))
+if (STEALTH_MODE) {
+    puppeteerExtra.use(StealthPlugin())
+}
+
+if (BLOCK_TRACKER) {
+    puppeteerExtra.use(AdBlockerPlugin({ blockTrackers: true }))
+}
 
 export class BrowserInstance {
-
-    private static launch(): Promise<Browser> {
+    private static launch(useragent: string): Promise<Browser> {
         return puppeteer.launch({
-            headless: true,
+            headless: HEADLESS,
             executablePath: CHROME_BINARY,
             userDataDir: PATH_USERFILE,
             ignoreDefaultArgs: ['--enable-automation'],
@@ -32,7 +35,8 @@ export class BrowserInstance {
                 '--disable-blink-features=AutomationControlled',
                 '--enable-blink-feautres=IdleDetection',
                 '--disable-extensions',
-                '--disable-infobars'
+                '--disable-infobars',
+                `--user-agent=${useragent}`
             ],
             defaultViewport: {
                 width: 1920,
@@ -41,10 +45,39 @@ export class BrowserInstance {
         })
     }
 
-    private static async getUndetectedPage(browser: Browser, useragent: string): Promise<Page> {
+    private static async getUndetectedPage(browser: Browser): Promise<Page> {
         const page = (await browser.pages())[0]
+        await this._timeout(1000)
 
-        let userAgent = page.setUserAgent(useragent)
+        const cdpSession = await page.createCDPSession();
+
+        // User Agent
+        const versionExt = await browser.version()
+        const version = versionExt.split("/")[1]
+        const userAgent = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) ${versionExt} Safari/537.36`
+        
+        let overrideUserAgent = cdpSession.send('Network.setUserAgentOverride', {
+                userAgent: userAgent,
+                userAgentMetadata: {
+                brands: [
+                    { brand: 'Google Chrome', version: version.split(".")[0] },
+                    { brand: 'Chromium', version: version.split(".")[0] },
+                    { brand: 'Not_A Brand', version: '24' },
+                ],
+                fullVersionList: [
+                    { brand: 'Google Chrome', version: version },
+                    { brand: 'Chromium', version: version },
+                    { brand: 'Not_A Brand', version: '24.0.0.0' },
+                ],
+                platform: 'Windows',
+                platformVersion: '10.0',
+                architecture: 'x86',
+                fullVersion: version,
+                model: '',
+                mobile: false
+            },
+        });
+
         let extraHeader = page.setExtraHTTPHeaders({
             "Accept-Language": 'en-US,en;q=0.9',
             "Sec-Ch-Ua": '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
@@ -55,36 +88,7 @@ export class BrowserInstance {
             "Sec-Fetch-Site": 'same-site'
         })
 
-        await Promise.all([userAgent, extraHeader])
-
-        /*await page.evaluateOnNewDocument(() => {
-            // @ts-ignore
-            const getParameter = WebGLRenderingContext.prototype.getParameter;
-
-            // @ts-ignore
-            WebGLRenderingContext.prototype.getParameter = function (parameter) {
-                if (parameter === 37445) return 'Intel Inc.';
-                if (parameter === 37446) return 'Intel Iris OpenGL Engine';
-                
-                return getParameter(parameter);
-            };
-            
-            // @ts-ignore
-            Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });
-            
-            // @ts-ignore
-            Object.defineProperty(navigator, 'deviceMemory', { get: () => 8 });
-            
-            // @ts-ignore
-            Object.defineProperty(navigator, 'webdriver', {
-                get: () => undefined,
-            });
-        
-            // @ts-ignore
-            Object.defineProperty(navigator, 'platform', {
-                get: () => 'Win32',
-            });
-        })*/
+        await Promise.all([overrideUserAgent, extraHeader])
 
         return page
     }
@@ -119,7 +123,7 @@ export class BrowserInstance {
                     browser.setCookie(this.createCookie("unique_id_durable", AuthUser.deviceId))
                 }
         
-                const page = await this.getUndetectedPage(browser, AuthUser.clientInfo.userAgent)
+                const page = await this.getUndetectedPage(browser)
                 
                 page.on('response', resp => {
                     if (resp.url() === "https://gql.twitch.tv/integrity") {
@@ -149,11 +153,11 @@ export class BrowserInstance {
     }
 
     public static async getIntegrityToken(): Promise<IIntegrityToken | undefined> {
-        const browser = await this.launch()
+        const browser = await this.launch(AuthUser.clientInfo.userAgent)
 
         let result = await Promise.race([
             this._getIntegrityToken(browser),
-            this._timeout(15000)
+            this._timeout(30000)
         ])
 
         browser.close()
@@ -161,10 +165,14 @@ export class BrowserInstance {
     }
 
     public static async test(): Promise<void> {
-        const browser = await this.launch()
+        const browser = await this.launch(AuthUser.clientInfo.userAgent)
 
-        const page = await this.getUndetectedPage(browser, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
-        await page.goto("https://deviceandbrowserinfo.com/are_you_a_bot")
+        const page = await this.getUndetectedPage(browser)
+        // await page.goto("https://deviceandbrowserinfo.com/are_you_a_bot")
+        // await page.goto("https://hmaker.github.io/selenium-detector/");
+        // await page.goto("https://bot-detector.rebrowser.net/");
+        // await page.goto("https://www.browserscan.net/bot-detection");
+        
 
         await new Promise(resolve => {})
     }

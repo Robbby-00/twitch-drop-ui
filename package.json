@@ -1,6 +1,6 @@
 {
     "name": "twitch-drop-ui",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "main": "src/build/index.js",
     "scripts": {
         "clean": "rimraf ./build",
@@ -8,7 +8,7 @@
         "build:start": "concurrently -k \"node frontend/serve.js\" \"node build/src/index.js\"",
         "build:start:env": "dotenvx run --env-file=.env -- npm run build:start",
         "production": "node updater.js && npm run build:start:env",
-        "release": "node _dev/release.js",
+        "release": "npm run build && node _dev/release.js",
         "dev": "dotenvx run --env-file=.env -- ts-node src",
         "dev:watch": "nodemon -e ts,json --exec npm run dev",
         "dev:ui": "cd frontend && npm run start",
@@ -37,12 +37,11 @@
         "express": "^4.21.2",
         "hls-parser": "^0.13.5",
         "http-proxy": "^1.18.1",
-        "puppeteer": "^23.11.1",
         "puppeteer-extra": "^3.3.6",
         "puppeteer-extra-plugin-adblocker": "^2.13.6",
         "puppeteer-extra-plugin-stealth": "^2.11.2",
         "read-pkg": "^9.0.1",
-        "selenium-webdriver": "^4.27.0",
+        "rebrowser-puppeteer-core": "^23.10.3",
         "typescript-node-express": "^1.0.3",
         "unzipper": "^0.12.3"
     }

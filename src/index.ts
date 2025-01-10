@@ -1,5 +1,5 @@
 // load constant
-import { ACCESS_TOKEN } from "./constant"
+import { ACCESS_TOKEN, BROWSER_TEST } from "./constant"
 
 // components
 import { AuthUser } from "./twitch/auth";
@@ -9,15 +9,20 @@ export const TW = new Twitch()
 
 import { Tracker } from "./tracker";
 import { startServer } from "./api";
+import { BrowserInstance } from "./browser";
 
 (async () => {
-    // MAIN
-    AuthUser.accessToken = ACCESS_TOKEN
+    if (BROWSER_TEST) {
+        BrowserInstance.test()
+    }else {
+        // MAIN
+        AuthUser.accessToken = ACCESS_TOKEN
 
-    AuthUser.validateAuth().then(() => {
-        AuthUser.updateIntegrity().then(() => {
-            AuthUser.startAutoUpdateIntegrity()
-            Tracker.load().then(startServer)
+        AuthUser.validateAuth().then(() => {
+            AuthUser.updateIntegrity().then(() => {
+                AuthUser.startAutoUpdateIntegrity()
+                Tracker.load().then(startServer)
+            })
         })
-    })
+    }
 })()

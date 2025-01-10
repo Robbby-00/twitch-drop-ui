@@ -1,8 +1,12 @@
 @echo off
-if not exist node_modules (npm install)
+set PATH=%~dp0\lib\;%PATH%
 
-npm run production || (
-    pause
-    exit /b
+if not exist node_modules (
+    call npm install 
+    call npx rebrowser-patches@latest patch --packageName puppeteer-core
+    if errorlevel 1 goto :next
 )
+
+:next
+call npm run production
 pause
