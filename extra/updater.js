@@ -1,7 +1,8 @@
 const { default: axios } = require("axios");
-const { readFileSync, createWriteStream, existsSync, unlinkSync, rmSync } = require("fs");
+const { readFileSync, createWriteStream, existsSync, unlinkSync, rmSync, dirname } = require("fs");
 const unzipper = require("unzipper");
 const { spawn } = require("node:child_process");
+const { mkdirSync } = require("node:fs");
 
 function getCurrentVersion() {
     try {
@@ -22,7 +23,7 @@ async function computeGithubResponse(res, currentVersion) {
 
     if (currentVersion === undefined || res["tag_name"] !== currentVersion) {
         // Download update
-        console.log(`Find new version: v${res["tag_name"]}\nDownloading update...`);
+        console.log(`Find new version: ${res["tag_name"]}\nDownloading update...`);
 
         try {
             const response = await axios({
@@ -57,6 +58,12 @@ async function streamUpdate(stream) {
                 // Replace files
                 if (existsSync(path)) {
                     unlinkSync(path);
+                }
+
+                // Create dirs if missing
+                const dir = dirname(path);
+                if (!existsSync(dir)) {
+                    mkdirSync(dir, { recursive: true });
                 }
 
                 entry.pipe(createWriteStream(path));
