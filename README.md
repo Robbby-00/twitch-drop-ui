@@ -60,7 +60,7 @@ The installation process is very simple:
 
 ### Linux
 
-> [!INFO]  
+> [!NOTE]  
 > A `start.sh`, script will implemented in the future.<br/><br/>
 > For **advanced users**, manually follow the steps in the `start.bat` file, skipping the environment setup part since the patch command is available by default on Linux.
 
