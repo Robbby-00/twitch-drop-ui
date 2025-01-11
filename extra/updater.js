@@ -94,21 +94,7 @@ async function main() {
 
         if (await computeGithubResponse(response.data, version)) {
             // succesfully update
-            console.log("Reinstalling dependencies...");
-            rmSync("node_modules", { recursive: true });
-
-            const proc_name = process.platform === "win32" ? "npm.cmd" : "npm";
-            const npm = spawn(proc_name, ["install"], { shell: true });
-
-            await new Promise((resolve) => {
-                npm.on("close", (code) => {
-                    if (code === 0) {
-                        console.log("Succesfully updated");
-                    } else console.log("Something goes wrong!");
-
-                    resolve();
-                });
-            });
+            console.log("Succesfully updated");
         }
     } catch (err) {
         console.log("Failed to retrive latest release!");
