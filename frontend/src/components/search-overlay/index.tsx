@@ -64,7 +64,7 @@ export function SearchOverlay(props: { type: ContentType }) {
                 setDefault([])
                 break
         }
-    }, [activeCampaign, type, getFollow, forceValue])
+    }, [activeCampaign, type])
 
     useEffect(() => {
         if (debounceValue !== "") {
@@ -92,7 +92,7 @@ export function SearchOverlay(props: { type: ContentType }) {
                     break
             }
         } else setResult(defaultValue)
-    }, [type, debounceValue, defaultValue, searchChannels, searchGames])
+    }, [type, debounceValue, defaultValue])
 
     useEffect(() => {
         setIsLoading(false)
