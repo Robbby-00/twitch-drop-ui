@@ -138,7 +138,8 @@ export class Tracker {
     @mutex(resourcesMutex)
     private static async updateWatchers() {
         this.log.info("Updating Watchers...")
-        let channelNTWPoint = this.pointChannels.filter(it => it.stream && !this.watchers.some(watch => watch.channel.login === it.login))
+
+        let channelNTWPoint = this.pointChannels.filter(it => it.stream)
         let channelNTWCampaign: [IChannelExtended, IDetailedCampaign][] = []
 
         // get campaign to watch
@@ -157,7 +158,6 @@ export class Tracker {
                 break
             }
 
-            // TODO: rework search channels (implment priority with channelNTWPoint)
             let channel = await searchCampaignChannels(campaign)
             if (channel) {
                 // set to watch channel

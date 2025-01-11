@@ -40,7 +40,6 @@ The data can be provided either through the **.env** file in the root folder or 
 ## Requirements
 
 -   [Node.JS](https://nodejs.org/en/download) 20 or higher
--   [Chrome](https://www.google.com/intl/it_it/chrome/)
 
 > [!WARNING]  
 > If you are using a **Virtual Machine**, you must have a _VGA_ or a _dedicated GPU_, as Twitch has anti-bot measures that prevent its use without proper hardware.
@@ -54,15 +53,14 @@ The installation process is very simple:
 3. **Rename** the `default.env` file to `.env`
 4. **Open** the `.env` file and modify the **ACCESS_TOKEN** key with your own token.
 
-### Windows
+### Windows:
 
 5. **Run** `start.bat`
 
-### Linux
+### Linux:
 
-> [!NOTE]  
-> A `start.sh`, script will implemented in the future.<br/><br/>
-> For **advanced users**, manually follow the steps in the `start.bat` file, skipping the environment setup part since the patch command is available by default on Linux.
+5. **Execute** `chmod +x start.sh` to set start.sh as executable
+6. **Run** `./start.sh`
 
 # Pictures
 

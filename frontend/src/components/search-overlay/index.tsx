@@ -43,6 +43,7 @@ export function SearchOverlay(props: { type: ContentType }) {
     const { trackChannel, trackCampaign, trackGame, activeCampaign } = useContext(DataContext)
     
     const [ inputText, setInputText ] = useState<string>("")
+    const [ isLoading, setIsLoading ] = useState<boolean>(false)
     const { debounceValue, forceValue } = useDebounce<string>(inputText, 500)
     const [ defaultValue, setDefault ] = useState<IChannel[] | ICampaign[] | IGame[]>([])
     const [ result, setResult ] = useState<IChannel[] | ICampaign[] | IGame[]>([])
@@ -63,12 +64,13 @@ export function SearchOverlay(props: { type: ContentType }) {
                 setDefault([])
                 break
         }
-    }, [activeCampaign, type])
+    }, [activeCampaign, type, getFollow, forceValue])
 
     useEffect(() => {
         if (debounceValue !== "") {
             let searchValueLowerCase = debounceValue.toLowerCase()
 
+            setIsLoading(true)
             switch (type) {
                 case ContentType.Channel:
                     if (defaultValue.length > 0 && !instanceOfChannel(defaultValue[0])) break
@@ -90,7 +92,11 @@ export function SearchOverlay(props: { type: ContentType }) {
                     break
             }
         } else setResult(defaultValue)
-    }, [type, debounceValue, defaultValue])
+    }, [type, debounceValue, defaultValue, searchChannels, searchGames])
+
+    useEffect(() => {
+        setIsLoading(false)
+    }, [result])
 
     const handleAddButton = async (data: IChannel | ICampaign | IGame, isTrack: boolean): Promise<void> => {
         let value: string = ""
@@ -114,6 +120,8 @@ export function SearchOverlay(props: { type: ContentType }) {
     }
 
     const renderResults = () => {
+        const emptyResult = <div className="no-result">No Results</div>
+
         switch (type) {
             case ContentType.Channel:
                 if (result.length > 0 && instanceOfChannel(result[0])) {
@@ -121,21 +129,21 @@ export function SearchOverlay(props: { type: ContentType }) {
                         const isTrack = trackChannel.some(ch => ch.id === item.id)
                         return <CardChannel key={idx} channel={item} isTrack={isTrack} onAddButtonClick={() => handleAddButton(item, isTrack)}/>
                     })
-                } else return <></>
+                } else return emptyResult
             case ContentType.Campaign:
                 if (result.length > 0 && instanceOfCampaign(result[0])) {
                     return (result as ICampaign[]).map((item, idx) => {
                         const isTrack = trackCampaign.some(c => c.id === item.id)
                         return <CardCampaign key={idx} campaign={item} isTrack={isTrack} onAddButtonClick={() => handleAddButton(item, isTrack)} />
                     })
-                }else return <></> 
+                }else return emptyResult
             case ContentType.Game:
                 if (result.length > 0 && instanceOfGame(result[0])) {
                     return (result as IGame[]).map((item, idx) => {
                         const isTrack = trackGame.some(gm => gm.slug === item.slug)
                         return <CardGame key={idx} game={item} isTrack={isTrack} onAddButtonClick={() => handleAddButton(item, isTrack)}/>
                     })
-                } else return <></>
+                } else return emptyResult
         }
     }
 
@@ -145,7 +153,7 @@ export function SearchOverlay(props: { type: ContentType }) {
             <input id="search" placeholder="Search" value={inputText} onChange={(e) => setInputText(e.target.value)}/>
         </div>
         <div className="container-results">
-            { renderResults() }
+            { isLoading ? <span className="loader"/> : renderResults() }
         </div>
     </div>
 }

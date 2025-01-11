@@ -89,7 +89,7 @@ export class Watch {
     
             return false
         } catch (err) {
-            console.error(err)
+            watchLog.info(`Error during send watch to ${this.channel.displayName}, probably live end!`)
             return false
         }
     }
@@ -143,7 +143,12 @@ export class Watch {
     public async watch() {
         watchLog.info(`Start watching ${this.channel.displayName}`)
 
-        await this.getStreamLink()
+        try {
+            await this.getStreamLink()
+        }catch(err) {
+            this.onStreamEnd()
+        }
+        
         await this._watch()
     }
 
