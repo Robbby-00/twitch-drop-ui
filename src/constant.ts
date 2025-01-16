@@ -18,6 +18,8 @@ export const API_PORT = process.env.API_PORT ?? 17472
 export const PATH_TRACKERFILE = join(STORAGE_DIR, './tracker.json')
 export const UPDATE_INTERVAL = 120              // in seconds
 export const CLAIM_INTERVAL = 300               // in seconds
+export const MAX_CONCURRENT_CAMPAIGN = 1        // max campaign streams watched
+export const MAX_CONCURRENT_WATCHER = 1         // max streams watched
 
 // Watcher
 export const WATCH_INTERVAL = 10    // in seconds

@@ -18,7 +18,7 @@ import { formatDateTime } from "../../utils";
 
 // icon
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown, faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faChevronDown, faEye, faShareFromSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
 
 // style
 import "./tracked-campaign.css"
@@ -98,9 +98,15 @@ export function TrackedCampaign(props: { campaign: ICampaign, editMode: boolean,
                     </div>
                 </div>
             </div>
-            { editMode ? renderEditsButton() : <div className="expand-btn" onClick={handleToggleExpanded}>
-                <FontAwesomeIcon icon={faChevronDown} />
-            </div> }
+            <div className="right-side">
+                { campaign.self.isAccountConnected ? 
+                    <Button style={ButtonStyle.FILL} text={"Connected"} clickable={false} /> :
+                    <Button style={ButtonStyle.EMPTY} text={"Connect"} icon={faShareFromSquare} onClick={() => window.open(campaign.accountLinkURL, "_blank")}/>  
+                }
+                { editMode ? renderEditsButton() : <div className="expand-btn" onClick={handleToggleExpanded}>
+                    <FontAwesomeIcon icon={faChevronDown} />
+                </div> }
+            </div>
         </div>
         <div className="spacer" />
         <div className="expanded-area">

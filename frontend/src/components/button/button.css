@@ -19,6 +19,10 @@
     transition: opacity .2s ease, background-color .2s ease, box-shadow .2s ease, color .2s ease, border .2s ease;
 }
 
+.button[data-clickable="false"] {
+    cursor: default;
+}
+
 .button > svg {
     height: 50%;
 }
@@ -36,7 +40,7 @@
     border: 2px solid transparent;
 }
 
-.button.fill:hover {
+.button.fill:not([data-clickable="false"]):hover {
     background-color: rgba(var(--background-button-rgb), .9);
     box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
 }
@@ -50,7 +54,7 @@
     border: 2px solid rgba(var(--background-button-rgb), .6);
 }
 
-.button.empty:hover {
+.button.empty:not([data-clickable="false"]):hover {
     border: 2px solid rgba(var(--background-button-rgb), .75);
     background-color: rgba(var(--background-button-rgb), .05);
     color: rgba(var(--font-rgb), 1);

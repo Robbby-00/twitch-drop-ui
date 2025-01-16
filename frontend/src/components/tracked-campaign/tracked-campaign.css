@@ -149,7 +149,17 @@
     opacity: .7;
 }
 
-.container-tracked-campaign > .header > .expand-btn {
+.container-tracked-campaign > .header > .right-side {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.container-tracked-campaign > .header > .right-side > .account-link {
+
+}
+
+.container-tracked-campaign > .header > .right-side > .expand-btn {
     margin: 0 12px;
     display: flex;
     justify-content: center;
@@ -164,7 +174,7 @@
     transition: transform .3s ease;
 }
 
-.container-tracked-campaign[data-expanded="true"] > .header > .expand-btn {
+.container-tracked-campaign[data-expanded="true"] > .header > .right-side > .expand-btn {
     transform: rotate(180deg);
 }
 

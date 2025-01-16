@@ -16,11 +16,12 @@ interface ButtonProps {
     icon?: IconDefinition
     onClick?: () => void
     disable?: boolean
+    clickable?: boolean
     dataAttributes?: {[key: string]: string}
 }
 
 export function Button(props: ButtonProps) {
-    const { style, text, classname, icon, onClick, disable, dataAttributes } = props
+    const { style, text, classname, icon, onClick, disable, clickable, dataAttributes } = props
 
     const handleClick = () => {
         if (!disable && onClick) {
@@ -28,7 +29,7 @@ export function Button(props: ButtonProps) {
         }
     }
 
-    return <div className={`button ${style} ${classname ?? ""}`} onClick={handleClick} data-disable={disable ?? false} {...dataAttributes}>
+    return <div className={`button ${style} ${classname ?? ""}`} onClick={handleClick} data-disable={disable ?? false} data-clickable={clickable ?? true} {...dataAttributes}>
         { icon !== undefined ? <FontAwesomeIcon icon={icon} /> : null }
         { text ? <span>{text}</span> : "" }
     </div>

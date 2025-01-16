@@ -16,7 +16,7 @@ export interface ICampaign {
     startAt: string
     endAt: string
     detailsURL: string
-    accountLinkUrl: string
+    accountLinkURL: string
     self: {
         isAccountConnected: boolean
     }

@@ -6,7 +6,7 @@ import { TW } from "..";
 import { Watch } from "./watch";
 
 // constant
-import { CLAIM_INTERVAL, PATH_TRACKERFILE, UPDATE_INTERVAL } from "../constant";
+import { CLAIM_INTERVAL, PATH_TRACKERFILE, UPDATE_INTERVAL, MAX_CONCURRENT_WATCHER, MAX_CONCURRENT_CAMPAIGN } from "../constant";
 
 // @types
 import { IChannelExtended, IDetailedCampaign, IGame } from "../twitch/@type";
@@ -21,6 +21,8 @@ import { Logger } from "../utils/logger";
 import { searchCampaignChannels, sortCampaignToFirstExpired } from "../utils";
 
 const resourcesMutex = new Mutex()
+
+const getDayInMillis = () => 1000 * 60 * 60 * 24
 
 export class Tracker {
     private static log: Logger = new Logger({
@@ -66,38 +68,44 @@ export class Tracker {
         let updatedChannels = await TW.getExtendedChannel([...new Set(channelLogin.concat(this.watchers.map(w => w.channel.login)))])
         let updatedCampaign = await TW.getDetailedCampaign([...new Set(campaignId.concat(this.watchers.map(w => w.campaign.map(c => c.id)).flat()))])
 
+        // remove expired campaign (more than 1 days)
+        updatedCampaign = updatedCampaign.filter(c => Date.parse(c.endAt) + getDayInMillis() > Date.now())
+
         // add drop details to updatedCampaign
         let inventory = await TW.getInventory()
         if (inventory) {
             // update drop minutes watched
-            for (let invCampaign of inventory.dropCampaignsInProgress) {
-                let campaign = updatedCampaign.find(campaign => campaign.id === invCampaign.id)
-                if (campaign) {
-                    campaign.drops = campaign.drops.map(drop => {
-                        let rawInvDrop = invCampaign.timeBasedDrops.find(it => it.id === drop.dropId)
-                        if (rawInvDrop) {
-                            drop.minutesWatched = rawInvDrop.self.currentMinutesWatched
-                            drop.isClaimed = rawInvDrop.self.isClaimed
-                            if (rawInvDrop.self.dropInstanceID !== null) {
-                                drop.dropInstanceID = rawInvDrop.self.dropInstanceID
+            if (inventory.dropCampaignsInProgress) {
+                for (let invCampaign of inventory.dropCampaignsInProgress) {
+                    let campaign = updatedCampaign.find(campaign => campaign.id === invCampaign.id)
+                    if (campaign) {
+                        campaign.drops = campaign.drops.map(drop => {
+                            let rawInvDrop = invCampaign.timeBasedDrops.find(it => it.id === drop.dropId)
+                            if (rawInvDrop) {
+                                drop.minutesWatched = rawInvDrop.self.currentMinutesWatched
+                                drop.isClaimed = rawInvDrop.self.isClaimed
+                                if (rawInvDrop.self.dropInstanceID !== null) {
+                                    drop.dropInstanceID = rawInvDrop.self.dropInstanceID
+                                }
                             }
-                        }
-                        
-                        return drop
-                    })
-                }
-            }
-
-            for (let collectedReward of inventory.gameEventDrops) {
-                let campaign = updatedCampaign.find(campaign  => campaign.drops.find(drop => drop.benefits.find(benefit => benefit.id === collectedReward.id)))
-                if (campaign) {
-                    let drop = campaign.drops.find(drop => drop.benefits.find(benefit => benefit.id === collectedReward.id))
-                    if (drop) {
-                        drop.isClaimed = true
+                            
+                            return drop
+                        })
                     }
                 }
-            }
-
+            }else this.log.warn("Failed to update drop watch time!")
+            
+            if (inventory.gameEventDrops) {
+                for (let collectedReward of inventory.gameEventDrops) {
+                    let campaign = updatedCampaign.find(campaign  => campaign.drops.find(drop => drop.benefits.find(benefit => benefit.id === collectedReward.id)))
+                    if (campaign) {
+                        let drop = campaign.drops.find(drop => drop.benefits.find(benefit => benefit.id === collectedReward.id))
+                        if (drop) {
+                            drop.isClaimed = true
+                        }
+                    }
+                }
+            }else this.log.warn("Failed to update drop claimed!")
         }else this.log.warn("Failed to retrive inventory!")
 
         // update channelsPoint
@@ -149,23 +157,30 @@ export class Tracker {
         campaignToWatch = sortCampaignToFirstExpired(campaignToWatch)
 
         // set to watch first available campaign
+        let watchingCampaign = 0
         for (let campaign of campaignToWatch) {
             let watcher = this.watchers.find(w => w.hasLinkedCampaign(campaign))
             if (watcher && watcher.channel.stream?.game.id === campaign.game.id) {
                 // already watching it
 
                 channelNTWCampaign.push([watcher.channel, campaign])
-                break
+                watchingCampaign++
+            }else {
+                let channel = await searchCampaignChannels(campaign)
+                if (channel) {
+                    // set to watch channel
+    
+                    channelNTWCampaign.push([channel, campaign])
+                    watchingCampaign++
+                } else this.log.info(`No channel found for "${campaign.name}" campaign`)
             }
 
-            let channel = await searchCampaignChannels(campaign)
-            if (channel) {
-                // set to watch channel
-
-                channelNTWCampaign.push([channel, campaign])
-                break
-            } else this.log.info(`No channel find for "${campaign.name}" campaign`)
+            // reached max concurrent campaign
+            if (!(watchingCampaign < MAX_CONCURRENT_CAMPAIGN)) break
         }
+
+        // filter channelNTWPoint, based on max concurrent watcher
+        channelNTWPoint = channelNTWPoint.slice(0, MAX_CONCURRENT_WATCHER - watchingCampaign)
 
         // reset watchers link
         this.watchers.forEach(w => w.resetLink())
@@ -209,9 +224,7 @@ export class Tracker {
         this.watchers = this.watchers.filter(w => {
             let removed = w.isUseless()
 
-            if (removed) {
-                w.stop(true)
-            }
+            if (removed) w.stop(true)
 
             return !removed
         })

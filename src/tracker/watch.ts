@@ -86,12 +86,11 @@ export class Watch {
                     return resp.status === 200
                 }
             }
-    
-            return false
         } catch (err) {
             watchLog.info(`Error during send watch to ${this.channel.displayName}, probably live end!`)
-            return false
         }
+
+        return false
     }
 
     private async delay(ms: number): Promise<void> {
@@ -113,14 +112,15 @@ export class Watch {
     private async _watch(): Promise<void> {
         try {
             let error_count = 0
-            while (!this.stopped || error_count < MAX_WATCH_ERROR) {
+            while (!this.stopped && error_count < MAX_WATCH_ERROR) {
                 let watched = await this.sendWatch()
                 if (watched) {
                     watchLog.info(`Succesfully watched ${this.channel.displayName}`)
     
                     error_count = 0
-                    await this.delay(WATCH_INTERVAL * 1000)
                 }else error_count++
+
+                await this.delay(WATCH_INTERVAL * 1000)
             }
         }catch(err) {
             if (err instanceof Error && err.name === "AbortError") {

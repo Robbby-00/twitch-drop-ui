@@ -74,7 +74,7 @@ export class BrowserInstance {
     }
 
     private static _getIntegrityToken(browser: Browser): Promise<IIntegrityToken | undefined> {
-        return new Promise<IIntegrityToken | undefined>(async resolve => {
+        return new Promise<IIntegrityToken | undefined>(async (resolve, reject) => {
             try {
                 if (AuthUser.accessToken !== undefined) {
                     browser.setCookie(this.createCookie("auth-token", AuthUser.accessToken))
@@ -86,6 +86,7 @@ export class BrowserInstance {
                 }
         
                 const page = await this.getPage(browser)
+                await this._timeout(1000)
                 
                 page.on('response', resp => {
                     if (resp.url() === "https://gql.twitch.tv/integrity") {
@@ -102,6 +103,8 @@ export class BrowserInstance {
                 await page.goto("https://www.twitch.tv/")
                 if (AuthUser.deviceId === undefined) {
                     let cookies = await browser.cookies()
+                    await this._timeout(1000)
+
                     let deviceIdCookie = cookies.find(it => it.name === "unique_id")
                     if (deviceIdCookie) {
                         AuthUser.deviceId = deviceIdCookie.value
@@ -116,6 +119,7 @@ export class BrowserInstance {
 
     public static async getIntegrityToken(): Promise<IIntegrityToken | undefined> {
         const browser = await this.launch(AuthUser.clientInfo.userAgent)
+        await this._timeout(1000)
 
         let result = await Promise.race([
             this._getIntegrityToken(browser),
