@@ -94,6 +94,8 @@ async function main() {
 
         if (await computeGithubResponse(response.data, version)) {
             // succesfully update
+            rmSync("./node_modules", { recursive: true });
+
             console.log("Succesfully updated");
         }
     } catch (err) {
