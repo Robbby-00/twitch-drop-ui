@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react"
+import { useContext, useState } from "react"
 
 // context
 import { OverlayContext } from "../../context/overlay"
@@ -23,7 +23,7 @@ import "./game-tracking.css"
 export function TrackingGamePage() {
 
     // context
-    const { preLoad, show } = useContext(OverlayContext)
+    const { show } = useContext(OverlayContext)
     const { trackGame } = useContext(DataContext)
 
     // state
@@ -34,12 +34,8 @@ export function TrackingGamePage() {
 
     const searchOverlay = <SearchOverlay type={ContentType.Game}/>
 
-    useEffect(() => {
-        preLoad(searchOverlay)
-    }, [])
-
     const handleAddGame = () => {
-        show()
+        show(searchOverlay)
     }
 
     return <div className="container-page">

@@ -100,7 +100,9 @@ export class BrowserInstance {
                     }
                 })
 
-                await page.goto("https://www.twitch.tv/")
+                await page.goto("https://www.twitch.tv/", { 
+                    waitUntil: 'domcontentloaded'
+                })
                 if (AuthUser.deviceId === undefined) {
                     let cookies = await browser.cookies()
                     await this._timeout(1000)

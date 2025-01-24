@@ -1,0 +1,18 @@
+.loader-spinner {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    position: relative;
+    animation: rotate 1s linear infinite;
+    opacity: .5;
+}
+
+.loader-spinner::before {
+    content: "";
+    box-sizing: border-box;
+    position: absolute;
+    inset: 0px;
+    border-radius: 50%;
+    border: 5px solid var(--font-hex);
+    animation: prixClipFix 2s linear infinite;
+}

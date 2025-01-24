@@ -4,13 +4,12 @@ import { parse } from 'hls-parser';
 // components
 import { TW } from "..";
 import { AuthUser } from "../twitch/auth";
+import { Settings } from "../settings";
 
 // @types
 import { IChannelExtended, IDetailedCampaign } from "../twitch/@type";
 import { MasterPlaylist, MediaPlaylist } from "hls-parser/types";
-
-// constant
-import { WATCH_INTERVAL, MAX_WATCH_ERROR } from "../constant";
+import { SettingKeys } from "../settings/@type";
 
 // utils
 import { Logger } from "../utils/logger";
@@ -112,7 +111,7 @@ export class Watch {
     private async _watch(): Promise<void> {
         try {
             let error_count = 0
-            while (!this.stopped && error_count < MAX_WATCH_ERROR) {
+            while (!this.stopped && error_count < Settings.getValue(SettingKeys.MAX_WATCH_ERROR)) {
                 let watched = await this.sendWatch()
                 if (watched) {
                     watchLog.info(`Succesfully watched ${this.channel.displayName}`)
@@ -120,7 +119,7 @@ export class Watch {
                     error_count = 0
                 }else error_count++
 
-                await this.delay(WATCH_INTERVAL * 1000)
+                await this.delay(Settings.getValue(SettingKeys.WATCH_INTERVAL) * 1000)
             }
         }catch(err) {
             if (err instanceof Error && err.name === "AbortError") {

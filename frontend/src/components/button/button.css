@@ -60,3 +60,15 @@
     color: rgba(var(--font-rgb), 1);
     box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
 }
+
+/*
+    LOADER
+*/
+.button > .loader-spinner {
+    width: 20px;
+    height: 20px;
+}
+
+.button > .loader-spinner::before {
+    border: 4px solid var(--font-hex);
+}

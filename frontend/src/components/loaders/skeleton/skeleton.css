@@ -1,0 +1,31 @@
+@keyframes shimmer {
+    from { 
+        background-position: 100%; 
+    }
+    to { 
+        background-position: -100%;
+    }
+  }
+  
+
+.loader-skeleton {
+    opacity: 1;
+    
+    background: linear-gradient(
+        90deg,
+        rgba(var(--font-rgb), .12) 25%,
+        rgba(var(--font-rgb), .08) 49%,
+        rgba(var(--font-rgb), .08) 51%,
+        rgba(var(--font-rgb), .12) 75%
+    );
+    background-size: 200% 100%;
+
+    animation: shimmer 1.5s infinite linear;
+
+    will-change: opacity !important;
+    transition: var(--transition-time) ease !important;
+}
+
+.loader-skeleton[data-show="false"] {
+    opacity: 0;
+}

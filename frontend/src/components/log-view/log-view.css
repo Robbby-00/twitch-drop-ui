@@ -1,0 +1,59 @@
+.container-log-view {
+    width: calc(100% - 96px);
+    height: 96px;
+    padding: 12px 48px;
+
+    background-color: var(--background-soft-hex);
+    border-radius: 12px;
+    overflow: hidden;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.container-log-view > .logs {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    mask: linear-gradient(0deg, rgba(0,0,0,1) 40%, rgba(0,0,0,0.8716736694677871) 50%, rgba(0,0,0,0.7288165266106443) 61%, rgba(0,0,0,0) 100%);
+
+    transform: translateY(-24px);
+}
+
+.container-log-view > .logs > .item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.container-log-view > .logs > .item > .timestamp {
+    padding: 4px 8px;
+    border-radius: 6px;
+
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: .5px;
+    background-color: rgba(var(--blue-rgb), .75);
+}
+
+.container-log-view > .logs > .item > .tag {
+    padding: 4px 8px;
+    border-radius: 6px;
+
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: .5px;
+    background-color: rgba(var(--yellow-rgb), .75);
+}
+
+.container-log-view > .logs > .item > .text {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.container-log-view > .logs > .item.secondary {
+    opacity: .5;
+    transform: scale(.95);
+}

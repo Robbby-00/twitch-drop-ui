@@ -2,12 +2,18 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 
-// App
+// app
 import { App } from './App';
 
-// Style
-import './index.css';
+// context
 import { DataProvider } from './context/data';
+import { SettingProvider } from './context/setting';
+
+// preload
+import './hooks/api';
+
+// style
+import './index.css';
 
 // Root
 const root = createRoot(
@@ -18,9 +24,11 @@ const root = createRoot(
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <DataProvider>
-        <App />
-      </DataProvider>
+      <SettingProvider>
+        <DataProvider>
+          <App />
+        </DataProvider>
+      </SettingProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

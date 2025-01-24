@@ -1,8 +1,13 @@
 const express = require("express");
 const path = require("path");
-const app = express();
 const httpProxy = require("http-proxy");
-const apiProxy = httpProxy.createProxyServer();
+const http = require("http");
+
+const app = express();
+const server = http.createServer(app);
+const apiProxy = httpProxy.createProxyServer({
+    ws: true,
+});
 
 const BACKEND = `http://localhost:${process.env.API_PORT ?? 17472}`;
 
@@ -29,7 +34,22 @@ app.all("/api/*", function (req, res) {
     });
 });
 
+server.on("upgrade", (req, socket, head) => {
+    if (req.url.startsWith("/api/")) {
+        try {
+            apiProxy.ws(req, socket, head, { target: BACKEND }, (err) => {
+                console.log(`[PROXY][WS][${err.code}] ${req.url}`);
+                socket.destroy();
+            });
+        } catch {
+            socket.destroy();
+        }
+    } else {
+        socket.destroy();
+    }
+});
+
 const WEB_PORT = process.env.WEB_PORT ?? 3000;
-app.listen(WEB_PORT, () => {
+server.listen(WEB_PORT, () => {
     console.log(`Listening on port: ${WEB_PORT}`);
 });

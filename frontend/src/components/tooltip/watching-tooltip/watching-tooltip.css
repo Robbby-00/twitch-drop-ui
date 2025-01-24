@@ -1,0 +1,46 @@
+.tooltip.watching {
+    height: 42px;
+    background-color: var(--background-soft-hex);
+    border: 2px solid rgba(var(--font-rgb), .2);
+}
+
+.tooltip.watching > .content {
+    max-width: 300px;
+    height: 100%;
+    padding: 0 48px 0 12px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+}
+
+.tooltip.watching > .content > .profile-image {
+    width: 32px;
+    height: 32px;
+}
+
+.tooltip.watching > .content > .profile-image > .live-badge {
+    font-size: 10px;
+}
+
+.tooltip.watching > .content > a {
+    text-decoration: none;
+}
+
+.tooltip.watching > .content > a > .name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--font-hex);
+    letter-spacing: .4px;
+    text-decoration: none;
+    white-space: nowrap;
+
+    will-change: color;
+    transition: color .2s ease;
+}
+
+.tooltip.watching > .content > a:hover > .name {
+    color: var(--primary-hex);
+    text-decoration: underline;
+}

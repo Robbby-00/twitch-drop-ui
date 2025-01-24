@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { useContext, useEffect, useState } from "react"
+import { useContext, useState } from "react"
 
 // context
 import { OverlayContext } from "../../context/overlay"
@@ -10,6 +10,7 @@ import { SearchOverlay } from "../../components/search-overlay"
 import { TrackedChannel } from "../../components/tracked-channel"
 import { Tooltip } from "../../components/tooltip"
 import { Button, ButtonStyle } from "../../components/button"
+import { ToggleButton } from "../../components/toggle-button"
 
 // @types
 import { ContentType, useApi } from "../../hooks/api"
@@ -19,14 +20,13 @@ import { faEdit, faPlus, faTriangleExclamation } from "@fortawesome/free-solid-s
 
 // style
 import "./points.css"
-import { ToggleButton } from "../../components/toggle-button"
 
 const WARNING_HIGH_TRACKING_MESSAGE = <>You are tracking more than <strong>15 channels</strong>. <br/>This increases traffic to Twitch's APIs, and the <strong>developer assumes no responsibility</strong> in case of account bans or suspensions. <br/><br/><strong>Recommendation</strong>: Do not exceed 15 tracked channels.</>
 
 export function PointsPage() {
 
     // context
-    const { preLoad, show } = useContext(OverlayContext)
+    const { show } = useContext(OverlayContext)
     const { trackChannel } = useContext(DataContext)
 
     // state
@@ -37,12 +37,8 @@ export function PointsPage() {
 
     const searchOverlay = <SearchOverlay type={ContentType.Channel}/>
 
-    useEffect(() => {
-        preLoad(searchOverlay)
-    }, [])
-
     const handleAddChannel = () => {
-        show()
+        show(searchOverlay)
     }
 
     return <div className="container-page">

@@ -5,28 +5,23 @@ import { useContext } from "react"
 import { DataContext } from "../../context/data"
 
 // @types
-import { IUser } from "./@type/user"
+import { DEFAULT_USER, IUser } from "./@type/user"
 import { IChannel, IChannelExtended, IWatchingChannel } from "./@type/channel"
 import { ICampaign } from "./@type/campaign"
 import { IGame } from "./@type/game"
+import { ICategory, ISetting } from "./@type/setting"
 
 enum HTTPMethod {
-    GET = "get",
-    POST = "post",
-    PUT = "put",
-    DELETE = "delete"
+    GET = "GET",
+    POST = "POST",
+    PUT = "PUT",
+    DELETE = "DELETE"
 }
 
 export enum ContentType {
     Channel = "channel",
     Campaign = "campaign",
     Game = "game"
-}
-
-export const DEFAULT_USER: IUser = {
-    id: "",
-    displayName: "",
-    profileImage: ""
 }
 
 // api version
@@ -36,12 +31,13 @@ const RETRY_TIME = 10 * 1000
 // update rate of watched channel
 const WATCHING_TIME = 20 * 1000
 
-function performRequest<T>(method: HTTPMethod, endpoint: string, manipulateData: (data: any) => T): Promise<T> {
+function performRequest<T>(method: HTTPMethod, endpoint: string, manipulateData: (data: any) => T, data?: object): Promise<T> {
     return new Promise((resolve, reject) => {
         let url = `/api/${VERSION}${endpoint}`
 
         axios({
             method: method,
+            data: data,
             url: url,
             timeout: 2000
         }).then(resp => {
@@ -57,6 +53,22 @@ export function useApi() {
 
     const { forceUpdateTrackedChannel, forceUpdateTrackedCampaign, forceUpdateTrackedGame } = useContext(DataContext)
     
+    const getChangelog = (): Promise<string> => {
+        return new Promise(resolve => {
+            performRequest<string>(HTTPMethod.GET, "/info/changelog", (raw) => raw)
+            .then(resolve)
+            .catch(() => "")
+        }) 
+    }
+
+    const getVersion = (): Promise<string> => {
+        return new Promise(resolve => {
+            performRequest<string>(HTTPMethod.GET, "/info/version", (raw) => raw)
+            .then(resolve)
+            .catch(() => "")
+        }) 
+    }
+
     const getUserData = (): Promise<[IUser, number]> => {
         return new Promise(resolve => {
             performRequest<[IUser, number]>(HTTPMethod.GET, "/user", (raw) => {
@@ -66,6 +78,32 @@ export function useApi() {
             })
             .then(resolve)
             .finally(() => resolve([DEFAULT_USER, RETRY_TIME]))
+        }) 
+    }
+
+    const getSettingCategories = (): Promise<ICategory[]> => {
+        return new Promise(resolve => {
+            performRequest<ICategory[]>(HTTPMethod.GET, "/setting/categories", (raw) => raw)
+            .then(resolve)
+            .finally(() => resolve([]))
+        }) 
+    }
+
+    const getSettings = (): Promise<ISetting[]> => {
+        return new Promise(resolve => {
+            performRequest<ISetting[]>(HTTPMethod.GET, "/setting", (raw) => raw)
+            .then(resolve)
+            .finally(() => resolve([]))
+        }) 
+    }
+
+    const applySetting = (key: string, value: any): Promise<ISetting | undefined> => {
+        return new Promise(resolve => {
+            performRequest<ISetting>(HTTPMethod.POST, `/setting/${key}`, (raw) => raw, {
+                "value": value
+            })
+            .then(resolve)
+            .catch(() => resolve(undefined))
         }) 
     }
 
@@ -248,8 +286,40 @@ export function useApi() {
         return new Promise((resolve, reject) => {
             performRequest<[ICampaign[], number]>(HTTPMethod.GET, `/campaign/track`, (raw) => {
                 let { data, nextUpdate } = raw
+                let parsed = data as ICampaign[]
+                
+                const isEnd = (item: ICampaign) => {
+                    let totalDrop = 0;
+                    let claimedDrop = 0;
+                    for (let drop of item.drops) {
+                        totalDrop += drop.benefits.length;
+                        if (drop.isClaimed) {
+                            claimedDrop += drop.benefits.length;
+                        }
+                    }
+                    return totalDrop === claimedDrop;
+                };
 
-                return [data as ICampaign[], nextUpdate]
+                // sort data
+                parsed.sort((a, b) => {
+                    if (a.status === "ACTIVE" && b.status === "EXPIRED") {
+                        return -1
+                    }
+                    if (a.status === "EXPIRED" && b.status === "ACTIVE") {
+                        return 1
+                    }
+
+                    let aEnd = isEnd(a)
+                    let bEnd = isEnd(b)
+
+                    if (aEnd !== bEnd) {
+                        return aEnd ? 1 : -1
+                    }
+
+                    return a.priority - b.priority
+                })
+
+                return [parsed, nextUpdate]
             })
             .then(resolve)
             .catch(err => {
@@ -277,7 +347,12 @@ export function useApi() {
     }
 
     return { 
-        getUserData, 
+        getChangelog,
+        getVersion,
+        getUserData,
+        getSettingCategories,
+        getSettings,
+        applySetting,
         searchChannels,
         searchGames,
         getFollow, 

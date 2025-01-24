@@ -1,4 +1,5 @@
-import express from 'express'
+import express from "express";
+import expressws from "express-ws"
 
 // constants
 import { API_PORT } from '../constant'
@@ -7,8 +8,7 @@ import { API_PORT } from '../constant'
 import { Logger } from '../utils/logger'
 import { Color, LogLevel } from '../utils/logger/@type'
 
-
-const app = express()
+const app = expressws(express()).app
 
 // Setup Logger
 const apiLog = new Logger({
@@ -21,6 +21,8 @@ const apiLog = new Logger({
 app.use(express.json());
 
 // User Routers
+import { infoRouter } from "./routers/info";
+app.use(`/api/v1/info`, infoRouter)
 import { userRouter } from './routers/user'
 app.use(`/api/v1/user`, userRouter)
 import { channelRouter } from './routers/channel'
@@ -31,9 +33,15 @@ import { watchRouter } from './routers/watch'
 app.use(`/api/v1/watch`, watchRouter)
 import { gameRouter } from './routers/game'
 app.use(`/api/v1/game`, gameRouter)
+import { settingRouter } from './routers/setting'
+app.use(`/api/v1/setting`, settingRouter)
+import { wsRouter } from './routers/ws'
+app.use(`/api/v1/ws`, wsRouter())
+
 
 // Error Handling
 import { errors } from './middleware/error'
+
 app.use(errors)
 
 // Starting Function

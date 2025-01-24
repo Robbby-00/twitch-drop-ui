@@ -1,7 +1,11 @@
 @echo off
 set PATH=%~dp0\lib\;%PATH%
 
-call npm run update
+if exist node_modules (
+    call npm run update
+) else (
+    echo "Skip update: no node_modules found!"
+)
 
 if not exist node_modules (
     call npm install 

@@ -5,18 +5,19 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { DataContext } from "../../context/data";
 
 // components
+import { Button, ButtonStyle } from "../button";
 import { ProfileImage } from "../profile-image";
 
 // @types
 import { IChannelExtended } from "../../hooks/api/@type/channel";
 
 // icons
-import { faEye, faTrash, faUserAlt } from "@fortawesome/free-solid-svg-icons";
+import { faTrash, faUserAlt } from "@fortawesome/free-solid-svg-icons";
 import { ReactComponent as PointsIcon } from "../../@asset/icon/points.svg"
 
 // style
 import "./tracked-channel.css"
-import { Button, ButtonStyle } from "../button";
+import { WatchingTooltip } from "../tooltip/watching-tooltip";
 
 const formatViewerCount = (value: number): string => {
     let numStr = value.toString();
@@ -62,9 +63,7 @@ export function TrackedChannel(props: { channel: IChannelExtended, editMode: boo
             <div className="container-data">
                 <div className="name">
                     {channel.displayName}
-                    {isWatching ? <a href={`https://www.twitch.tv/${channel.login}`} target="_blank">
-                        <FontAwesomeIcon icon={faEye} />
-                    </a> : null}
+                    {isWatching ? <WatchingTooltip channel={channel} />: null}
                 </div>
                 { 
                     channel.stream !== undefined ?  

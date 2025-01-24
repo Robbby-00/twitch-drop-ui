@@ -1,7 +1,9 @@
 import { TW } from "..";
 
 // @types
-import { IChannelExtended, IDetailedCampaign } from "../twitch/@type";
+import { IChannelExtended, IDetailedCampaign, IDetailedCampaignPrioritize } from "../twitch/@type";
+
+export const getDayInMillis = () => 1000 * 60 * 60 * 24
 
 export function splitArrayIntoChunks<T>(arr: T[], chunk: number): T[][] {
     const result: T[][] = [];
@@ -54,6 +56,22 @@ export const searchCampaignChannels = async (campaign: IDetailedCampaign): Promi
     return undefined
 }
 
+export const applyPriorityValue = (campaign: IDetailedCampaign): IDetailedCampaignPrioritize => {
+    let maxDropWatchtime = Math.max(...campaign.drops.map<number>(drop => drop.requiredMinutesWatched))
+    let arrayMinutesWatched = campaign.drops.map<number | undefined>(drop => drop.minutesWatched).filter(minutes => minutes !== undefined)
+    let minutesWatched = arrayMinutesWatched.length > 0 ? Math.min(...arrayMinutesWatched) : 0
+    let minutesToWatch = maxDropWatchtime - minutesWatched
+
+    let endMillis = new Date(campaign.endAt).getTime()
+    let deltaMillis = endMillis - Date.now()
+
+    return {
+        ...campaign,
+        priority: deltaMillis - (minutesToWatch * 60 * 1000)
+    }
+}
+
+/*
 export const sortCampaignToFirstExpired = (campaigns: IDetailedCampaign[]): IDetailedCampaign[] => {
     return campaigns.map<[IDetailedCampaign, number]>(campaign => {
         let maxDropWatchtime = Math.max(...campaign.drops.map<number>(drop => drop.requiredMinutesWatched))
@@ -66,4 +84,4 @@ export const sortCampaignToFirstExpired = (campaigns: IDetailedCampaign[]): IDet
 
         return [campaign, deltaMillis - (minutesToWatch * 60 * 1000)]
     }).sort((a, b) => a[1] - b[1]).map<IDetailedCampaign>(([campaign, sortingValue]) => campaign)
-}
+}*/

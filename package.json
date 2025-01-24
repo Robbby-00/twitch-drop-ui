@@ -1,6 +1,6 @@
 {
     "name": "twitch-drop-ui",
-    "version": "1.0.3",
+    "version": "1.1.0",
     "main": "src/build/index.js",
     "scripts": {
         "clean": "rimraf ./build",
@@ -28,6 +28,7 @@
         "typescript": "^5.7.2"
     },
     "dependencies": {
+        "@types/express-ws": "^3.0.5",
         "@types/hls-parser": "^0.8.7",
         "@types/puppeteer": "^5.4.7",
         "@types/selenium-webdriver": "^4.1.27",
@@ -36,6 +37,7 @@
         "axios": "^1.7.9",
         "dayjs": "^1.11.13",
         "express": "^4.21.2",
+        "express-ws": "^5.0.2",
         "hls-parser": "^0.13.5",
         "http-proxy": "^1.18.1",
         "puppeteer-extra": "^3.3.6",
@@ -44,6 +46,7 @@
         "read-pkg": "^9.0.1",
         "rebrowser-puppeteer-core": "^23.10.3",
         "typescript-node-express": "^1.0.3",
-        "unzipper": "^0.12.3"
+        "unzipper": "^0.12.3",
+        "ws": "^8.18.0"
     }
 }

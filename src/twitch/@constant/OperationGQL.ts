@@ -6,7 +6,8 @@ export const LinkGQL = "https://gql.twitch.tv/gql"
 export enum OperationNameGQL {
     FollowedChannels = "PersonalSections",
     SearchTray = "SearchTray_SearchSuggestions",
-    GetUserInfo = "VerifyEmail_CurrentUser",
+    // GetUserInfo = "VerifyEmail_CurrentUser",
+    GetUserInfo = "CoreActionsCurrentUser",
     GetUserImage = "UserMenuCurrentUser",
     GetStreamInfo = "VideoPlayerStreamInfoOverlayChannel",
     ClaimComunityPoints = "ClaimCommunityPoints",
@@ -25,7 +26,8 @@ export enum OperationNameGQL {
 export enum Sha256GQL {
     FollowedChannels = "4c3776186239b845f100e5d989a4823f8586c899fb5e7cd856efabd2405b998c",
     SearchTray = "2749d8bc89a2ddd37518e23742a4287becd3064c40465d8b57317cabd0efe096",
-    GetUserInfo = "f9e7dcdf7e99c314c82d8f7f725fab5f99d1df3d7359b53c9ae122deec590198",
+    // GetUserInfo = "f9e7dcdf7e99c314c82d8f7f725fab5f99d1df3d7359b53c9ae122deec590198",
+    GetUserInfo = "6b5b63a013cf66a995d61f71a508ab5c8e4473350c5d4136f846ba65e8101e95",
     GetUserImage = "3cff634f43c5c78830907a662b315b1847cfc0dce32e6a9752e7f5d70b37f8c0",
     GetStreamInfo = "198492e0857f6aedead9665c81c5a06d67b25b58034649687124083ff288597d",
     ClaimComunityPoints = "46aaeebe02c99afdf4fc97c7c0cba964124bf6b0af229395f1f6d1feed05b3d0",

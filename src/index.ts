@@ -10,8 +10,11 @@ export const TW = new Twitch()
 import { Tracker } from "./tracker";
 import { startServer } from "./api";
 import { BrowserInstance } from "./browser";
+import { Settings } from "./settings";
 
 (async () => {
+    await Settings.load()
+
     if (BROWSER_TEST) {
         BrowserInstance.test()
     }else {

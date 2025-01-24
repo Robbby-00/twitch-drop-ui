@@ -1,0 +1,207 @@
+.container-settings {
+    max-width: 1400px;
+    width: 70%;
+    height: 70%;
+    padding: 24px 36px;
+    background-color: var(--background-base-hex);
+    border-radius: 12px;
+
+    display: flex;
+    align-items: center;
+}
+
+.container-settings > .spacer {
+    width: 3px;
+    height: 98%;
+    border-radius: 64px;
+    margin: 0 24px;
+
+    background-color: rgba(var(--font-rgb), .025);
+}
+
+/*
+    LEFT SIDE
+*/
+.container-settings > .left-side {
+    width: 30%;
+    height: calc(100% - 32px);
+    padding: 16px 0;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.container-settings > .left-side > .categories {
+    width: 100%;
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.container-settings > .left-side > .categories > .item {
+    width: calc(100% - 48px);
+    height: 42px;
+    padding: 0 24px;
+    border-radius: 8px;
+    cursor: pointer;
+
+    color: rgba(var(--font-rgb), .5);
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: .8px;
+
+    display: flex;
+    align-items: center;
+
+    will-change: background-color, color;
+    transition: background-color .3s ease, color .3s ease;
+}
+
+.container-settings > .left-side > .categories > .item[data-selected="true"] {
+    color: rgba(var(--font-rgb), .7);
+    background-color: rgba(var(--font-rgb), .03);
+}
+
+.container-settings > .left-side > .categories > .item:hover {
+    color: rgba(var(--font-rgb), .9);
+    background-color: rgba(var(--font-rgb), .05);
+}
+
+/*
+    Footer
+*/
+.container-settings > .left-side > .footer {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0 4px;
+
+    display: flex;
+}
+.container-settings > .left-side > .footer > div {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 6px;
+
+    font-size: 13px;
+}
+
+.container-settings > .left-side > .footer > div.right-side {
+    align-items: flex-end;
+}
+
+.container-settings > .left-side > .footer > div.right-side > a > svg {
+    height: 24px;
+    color: var(--font-hex);
+    opacity: .4;
+
+    will-change: opacity;
+    transition: opacity .3s ease;
+}
+
+.container-settings > .left-side > .footer > div.right-side > a:hover > svg {
+    opacity: .7;
+}
+
+.container-settings > .left-side > .footer > div > span {
+    width: min-content;
+
+    letter-spacing: .6px;
+    opacity: .3;
+}
+
+.container-settings > .left-side > .footer > div > .changelog {
+    cursor: pointer;
+
+    opacity: .5;
+    will-change: opacity;
+    transition: opacity .3s ease;
+}
+
+.container-settings > .left-side > .footer > div > .changelog:hover {
+    text-decoration: underline;
+    opacity: .7;
+}
+
+/*
+    Sections
+*/
+.container-settings > .section {
+    flex: 1;
+    box-sizing: border-box;
+    height: 100%;
+    padding: 12px 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+}
+
+.container-settings > .section:has(> .settings > .changelog) {
+    gap: 24px;
+}
+
+.container-settings > .section > .title {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: .8px;
+}
+
+.container-settings > .section > .settings {
+    flex: 1;
+    padding: 0 24px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    
+    overflow-x: visible;
+    overflow-y: auto;
+}
+
+.container-settings > .section > .buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 24px;
+}
+
+.container-settings > .section > .buttons > .button {
+    width: 96px;
+}
+
+.container-settings > .section > .buttons > .button.reset {
+    --background-button-rgb: var(--red-rgb);
+}
+
+/*
+    Changelog View
+*/
+.container-settings > .section > .settings > .changelog :not(h1, h2, h3, h4, h5, h6) {
+    font-size: 15px;
+}
+
+.container-settings > .section > .settings > .changelog code {
+    font-size: 14px;
+    padding: 1px 8px;
+    background-color: var(--background-hex);
+    color: var(--code-hex);
+    border-radius: 4px;
+}
+
+/*
+    Skeleton Loader
+*/
+.container-settings:has(> .loader) {
+    align-items: self-start;
+    justify-content: center;
+}
+
+.container-settings > .loader {
+    margin-top: 6%;
+}

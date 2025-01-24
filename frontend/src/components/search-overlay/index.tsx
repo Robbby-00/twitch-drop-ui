@@ -1,12 +1,14 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 // context
 import { DataContext } from "../../context/data";
 
 // components
+import { LoaderSpinner } from "../loaders/spinner";
 import { CardChannel } from "./card-channel";
 import { CardCampaign } from "./card-campaign";
+import { CardGame } from "./card-game";
 
 // hooks
 import { ContentType, useApi } from "../../hooks/api";
@@ -20,8 +22,9 @@ import { IGame } from "../../hooks/api/@type/game";
 // icons
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 
+// style
 import "./search-overlay.css"
-import { CardGame } from "./card-game";
+import { OverlayContext } from "../../context/overlay";
 
 function instanceOfChannel(object: any): object is IChannel {
     return 'profileImage' in object;
@@ -41,12 +44,15 @@ export function SearchOverlay(props: { type: ContentType }) {
 
     const { searchChannels, searchGames, getFollow, addToTracking, removeToTracking } = useApi()
     const { trackChannel, trackCampaign, trackGame, activeCampaign } = useContext(DataContext)
+    const { on, off } = useContext(OverlayContext)
     
     const [ inputText, setInputText ] = useState<string>("")
     const [ isLoading, setIsLoading ] = useState<boolean>(false)
     const { debounceValue, forceValue } = useDebounce<string>(inputText, 500)
     const [ defaultValue, setDefault ] = useState<IChannel[] | ICampaign[] | IGame[]>([])
     const [ result, setResult ] = useState<IChannel[] | ICampaign[] | IGame[]>([])
+
+    const inputRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
         // reset search bar
@@ -97,6 +103,16 @@ export function SearchOverlay(props: { type: ContentType }) {
     useEffect(() => {
         setIsLoading(false)
     }, [result])
+
+    useEffect(() => {
+        on("show", handleFoucus)
+
+        return () => off("show", handleFoucus)
+    }, [on, off])
+
+    const handleFoucus = () => {
+        inputRef.current?.focus()
+    }
 
     const handleAddButton = async (data: IChannel | ICampaign | IGame, isTrack: boolean): Promise<void> => {
         let value: string = ""
@@ -150,10 +166,10 @@ export function SearchOverlay(props: { type: ContentType }) {
     return <div className="search-overlay">
         <div className="search-bar">
             <FontAwesomeIcon icon={faMagnifyingGlass} />
-            <input id="search" placeholder="Search" value={inputText} onChange={(e) => setInputText(e.target.value)}/>
+            <input ref={inputRef} id="search" placeholder="Search" value={inputText} onChange={(e) => setInputText(e.target.value)}/>
         </div>
         <div className="container-results">
-            { isLoading ? <span className="loader"/> : renderResults() }
+            { isLoading ? <LoaderSpinner /> : renderResults() }
         </div>
     </div>
 }

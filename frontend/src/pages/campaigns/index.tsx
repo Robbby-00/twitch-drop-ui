@@ -22,7 +22,7 @@ import { ToggleButton } from "../../components/toggle-button"
 export function CampaignsPage() {
 
     // context
-    const { preLoad, show } = useContext(OverlayContext)
+    const { show } = useContext(OverlayContext)
     const { trackCampaign, servicesStatus } = useContext(DataContext)
     
     // hooks
@@ -36,15 +36,11 @@ export function CampaignsPage() {
     const searchOverlay = <SearchOverlay type={ContentType.Campaign}/>
 
     useEffect(() => {
-        preLoad(searchOverlay)
-    }, [])
-
-    useEffect(() => {
         setIsAvaiable(servicesStatus.campaigns === "avaiable")
     }, [servicesStatus])
 
     const handleAddCampaigns = () => {
-        show()
+        show(searchOverlay)
     }
 
     if (!isAvaiable) {

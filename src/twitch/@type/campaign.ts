@@ -54,6 +54,10 @@ export interface IDetailedCampaign {
     drops: IDrop[]
 }
 
+export interface IDetailedCampaignPrioritize extends IDetailedCampaign {
+    priority: number
+}
+
 export interface IRawCampaign {
     id: string
     name: string

@@ -4,25 +4,37 @@ import { existsSync, readFileSync, writeFileSync } from "fs";
 // components
 import { TW } from "..";
 import { Watch } from "./watch";
+import { Settings } from '../settings';
 
 // constant
-import { CLAIM_INTERVAL, PATH_TRACKERFILE, UPDATE_INTERVAL, MAX_CONCURRENT_WATCHER, MAX_CONCURRENT_CAMPAIGN } from "../constant";
+import { PATH_TRACKERFILE } from "../constant";
 
 // @types
-import { IChannelExtended, IDetailedCampaign, IGame } from "../twitch/@type";
+import { IChannelExtended, IDetailedCampaignPrioritize, IGame } from "../twitch/@type";
 import { ITrackerObject, TargetPayload, IPayloadTracker, IWatchingChannel, ITrackerResult } from "./@types";
 import { Color, LogLevel } from "../utils/logger/@type";
+import { SettingKeys } from '../settings/@type';
 
 // @decorators
-import { mutex } from './@decorator/mutex';
+import { mutex } from '../@decorator/mutex';
 
 // utils
 import { Logger } from "../utils/logger";
-import { searchCampaignChannels, sortCampaignToFirstExpired } from "../utils";
+import { applyPriorityValue, getDayInMillis, searchCampaignChannels } from "../utils";
+import { emitUpdate, UpdateType } from '../api/routers/ws';
 
 const resourcesMutex = new Mutex()
 
-const getDayInMillis = () => 1000 * 60 * 60 * 24
+enum ReasonTrack {
+    Manual = "manual",
+    Game = "game",
+    LinkedAccount = "linked-account"
+}
+
+interface CutstomCamapign {
+    reason: ReasonTrack[],
+    campaign: IDetailedCampaignPrioritize
+}
 
 export class Tracker {
     private static log: Logger = new Logger({
@@ -30,16 +42,16 @@ export class Tracker {
         color: Color.YELLOW,
         logLevel: LogLevel.DEBUG
     })
-    public static nextUpdate: number = Date.now() + (UPDATE_INTERVAL * 1000)
+    public static nextUpdate: number = Date.now() + (Settings.getValue(SettingKeys.UPDATE_INTERVAL) * 1000)
     private static pointChannels: IChannelExtended[] = []
-    private static dropCampaign: IDetailedCampaign[] = []
+    private static dropCampaign: CutstomCamapign[] = []
     private static trackingGame: IGame[] = []
     private static watchers: Watch[] = []
 
     private static toObject(): ITrackerObject {
         return {
             pointChannels: this.pointChannels.map(it => it.login),
-            dropCampaign: this.dropCampaign.map(it => it.id),
+            dropCampaign: this.dropCampaign.filter(it => it.reason.includes(ReasonTrack.Manual)).map(it => it.campaign.id),
             tarckingGame: this.trackingGame.map(it => it.slug)
         }
     }
@@ -48,25 +60,36 @@ export class Tracker {
     private static async updateData(overrideChannel?: string[], overrideCampaign?: string[], overrideGame?: string[]): Promise<void> {
         let startTime = Date.now()
         let channelLogin: string[] = overrideChannel ?? this.pointChannels.map(it => it.login)
-        let campaignId: string[] = overrideCampaign ?? this.dropCampaign.map(it => it.id)
+        let manualCampaignId: string[] = overrideCampaign ?? this.dropCampaign.filter(it => it.reason.includes(ReasonTrack.Manual)).map(it => it.campaign.id)
         let gameSlug: string[] = overrideGame ?? this.trackingGame.map(it => it.slug)
         
         // update games
+        let gameCampaignId: string[] = []
         if (gameSlug.length > 0) {
             this.trackingGame = await TW.getGame(gameSlug)
             
             let campaigns = await TW.getCampaigns()
             campaigns.forEach(campaign => {
-                let find = this.trackingGame.find(game => game.id === campaign.game.id)
-                if (find && !campaignId.includes(campaign.id)) {
-                    campaignId.push(campaign.id)
+                if (this.trackingGame.find(game => game.id === campaign.game.id)) {
+                    gameCampaignId.push(campaign.id)
+                }
+            })
+        }
+
+        // add auto connected campaign
+        let linkedAccountCampaignId: string[] = []
+        if (Settings.getValue(SettingKeys.AUTO_CONNECTED_CAMPAIGN)) {
+            let campaigns = await TW.getCampaigns()
+            campaigns.forEach(campaign => {
+                if (campaign.self.isAccountConnected) {
+                    linkedAccountCampaignId.push(campaign.id)
                 }
             })
         }
 
         // request update
-        let updatedChannels = await TW.getExtendedChannel([...new Set(channelLogin.concat(this.watchers.map(w => w.channel.login)))])
-        let updatedCampaign = await TW.getDetailedCampaign([...new Set(campaignId.concat(this.watchers.map(w => w.campaign.map(c => c.id)).flat()))])
+        let updatedChannels = await TW.getExtendedChannel([...new Set(channelLogin)])
+        let updatedCampaign = await TW.getDetailedCampaign([...new Set(manualCampaignId.concat(gameCampaignId).concat(linkedAccountCampaignId))])
 
         // remove expired campaign (more than 1 days)
         updatedCampaign = updatedCampaign.filter(c => Date.parse(c.endAt) + getDayInMillis() > Date.now())
@@ -97,22 +120,50 @@ export class Tracker {
             
             if (inventory.gameEventDrops) {
                 for (let collectedReward of inventory.gameEventDrops) {
-                    let campaign = updatedCampaign.find(campaign  => campaign.drops.find(drop => drop.benefits.find(benefit => benefit.id === collectedReward.id)))
-                    if (campaign) {
-                        let drop = campaign.drops.find(drop => drop.benefits.find(benefit => benefit.id === collectedReward.id))
-                        if (drop) {
-                            drop.isClaimed = true
+                    let dropCount = collectedReward.totalCount
+                    for (let campaign of updatedCampaign) {
+                        for (let drop of campaign.drops) {
+                            for (let benefit of drop.benefits) {
+                                if (benefit.id === collectedReward.id) {
+                                    drop.isClaimed = true
+                                    dropCount--
+                                }
+
+                                if (dropCount <= 0) break
+                            }
                         }
                     }
                 }
             }else this.log.warn("Failed to update drop claimed!")
         }else this.log.warn("Failed to retrive inventory!")
 
+        // add priority
+        let updatedCampaignPrioritize = updatedCampaign.map<IDetailedCampaignPrioritize>(applyPriorityValue)
+
         // update channelsPoint
         this.pointChannels = updatedChannels.filter(channel => channelLogin.includes(channel.login))
 
         // update campaigns
-        this.dropCampaign = updatedCampaign.filter(campaign => campaignId.includes(campaign.id))
+        this.dropCampaign = updatedCampaignPrioritize.map<CutstomCamapign>(campaign => {
+            let reason: ReasonTrack[] = []
+
+            if (manualCampaignId.includes(campaign.id)) {
+                reason.push(ReasonTrack.Manual)
+            }
+
+            if (gameCampaignId.includes(campaign.id)) {
+                reason.push(ReasonTrack.Game)
+            }
+
+            if (linkedAccountCampaignId.includes(campaign.id)) {
+                reason.push(ReasonTrack.LinkedAccount)
+            }
+
+            return {
+                reason,
+                campaign
+            }
+        })
 
         // update watchers
         this.watchers.forEach(w => {
@@ -130,6 +181,10 @@ export class Tracker {
         this.updateWatchers()
         
         this.log.info(`Updated data in ${Date.now() - startTime}ms`)
+
+        emitUpdate(UpdateType.TRACK_CHANNEL)
+        emitUpdate(UpdateType.TRACK_CAMPAIGN)
+        emitUpdate(UpdateType.TRACK_GAME)
     }
 
     @mutex(resourcesMutex)
@@ -139,7 +194,7 @@ export class Tracker {
             this.log.debug(`Removed watcher on channel: ${this.watchers[idx].channel.displayName}`)
             this.watchers.splice(idx, 1)
             
-            await this.updateWatchers()
+            this.updateWatchers()
         }
     }
 
@@ -148,13 +203,13 @@ export class Tracker {
         this.log.info("Updating Watchers...")
 
         let channelNTWPoint = this.pointChannels.filter(it => it.stream)
-        let channelNTWCampaign: [IChannelExtended, IDetailedCampaign][] = []
+        let channelNTWCampaign: [IChannelExtended, IDetailedCampaignPrioritize][] = []
 
         // get campaign to watch
-        let campaignToWatch = this.dropCampaign.filter(c => c.status === "ACTIVE" && !c.drops.every(drop => drop.isClaimed))
+        let campaignToWatch = this.dropCampaign.map(cc => cc.campaign).filter(c => c.status === "ACTIVE" && !c.drops.every(drop => drop.isClaimed))
 
         // sort campaign based on remaining time and drop length
-        campaignToWatch = sortCampaignToFirstExpired(campaignToWatch)
+        campaignToWatch.sort((a, b) => a.priority - b.priority)
 
         // set to watch first available campaign
         let watchingCampaign = 0
@@ -176,11 +231,11 @@ export class Tracker {
             }
 
             // reached max concurrent campaign
-            if (!(watchingCampaign < MAX_CONCURRENT_CAMPAIGN)) break
+            if (!(watchingCampaign < Settings.getValue(SettingKeys.MAX_CONCURRENT_CAMPAIGN))) break
         }
 
         // filter channelNTWPoint, based on max concurrent watcher
-        channelNTWPoint = channelNTWPoint.slice(0, MAX_CONCURRENT_WATCHER - watchingCampaign)
+        channelNTWPoint = channelNTWPoint.slice(0, Settings.getValue(SettingKeys.MAX_CONCURRENT_WATCHER) - watchingCampaign)
 
         // reset watchers link
         this.watchers.forEach(w => w.resetLink())
@@ -228,6 +283,8 @@ export class Tracker {
 
             return !removed
         })
+
+        emitUpdate(UpdateType.WATCHING_CHANNEL)
     }
 
     private static async claimAll() {
@@ -246,7 +303,7 @@ export class Tracker {
     
         // claim drop if available
         let dropToClaim: string[] = []
-        for (let campaign of this.dropCampaign) {
+        for (let { campaign } of this.dropCampaign) {
             let claimable = campaign.drops.map<string | undefined>(drop => !drop.isClaimed ? drop.dropInstanceID : undefined)
             dropToClaim.push(...claimable.filter<string>(dropInstanceID => dropInstanceID !== undefined))
         }
@@ -255,7 +312,7 @@ export class Tracker {
             let dropInstanceID = dropToClaim[idx]
             let [userId, campaignId, dropId] = dropInstanceID.split("#")
 
-            let selectedCampaign = this.dropCampaign.find(campaign => campaign.id === campaignId)
+            let selectedCampaign = this.dropCampaign.find(cc => cc.campaign.id === campaignId)?.campaign
             if (selectedCampaign) {
                 let selectedDrop = selectedCampaign.drops.find(drop => drop.dropId === dropId)
                 if (selectedDrop) {
@@ -272,11 +329,28 @@ export class Tracker {
     private static async startUpdateSystem() {
         this.log.info("Started update system")
 
+        var timeoutUpdate: NodeJS.Timeout | undefined
+        var resolve: (value?: unknown) => void | undefined
+        const forceUpdate = () => {
+            if (timeoutUpdate) {
+                clearTimeout(timeoutUpdate)
+            }
+            
+            this.updateData().then(resolve)
+        }
+
+        Settings.on(SettingKeys.AUTO_CONNECTED_CAMPAIGN, forceUpdate)
+        Settings.on(SettingKeys.MAX_CONCURRENT_CAMPAIGN, forceUpdate)
+        Settings.on(SettingKeys.MAX_CONCURRENT_WATCHER, forceUpdate)
+
         while (true) {
-            await new Promise(resolve => setTimeout(() => {
-                this.updateData().then(resolve)
-            }, this.nextUpdate - Date.now()))
-            this.nextUpdate = Date.now() + (UPDATE_INTERVAL * 1000)
+            await new Promise(res => {
+                resolve = res
+                timeoutUpdate = setTimeout(() => {
+                    this.updateData().then(res)
+                }, this.nextUpdate - Date.now())
+            })
+            this.nextUpdate = Date.now() + (Settings.getValue(SettingKeys.UPDATE_INTERVAL) * 1000)
         }
     }
 
@@ -287,7 +361,7 @@ export class Tracker {
         while (true) {
             await new Promise(resolve => setTimeout(async () => {
                 this.claimAll().then(resolve)
-            }, CLAIM_INTERVAL * 1000))
+            }, Settings.getValue(SettingKeys.CLAIM_INTERVAL) * 1000))
         }
     }
 
@@ -325,12 +399,24 @@ export class Tracker {
         switch (data.type) {
             case TargetPayload.Point:
                 state = await this.addChannel(data.payload)
+                if (state === ITrackerResult.Successfully) {
+                    emitUpdate(UpdateType.TRACK_CHANNEL)
+                }
+
                 break
             case TargetPayload.Campaign:
                 state = await this.addCampaign(data.payload)
+                if (state === ITrackerResult.Successfully) {
+                    emitUpdate(UpdateType.TRACK_CAMPAIGN)
+                }
+
                 break
             case TargetPayload.Game:
                 state = await this.addGame(data.payload)
+                if (state === ITrackerResult.Successfully) {
+                    emitUpdate(UpdateType.TRACK_GAME)
+                }
+
                 break
         } 
 
@@ -363,8 +449,13 @@ export class Tracker {
 
     @mutex(resourcesMutex)
     private static async addCampaign(campaignId: string): Promise<ITrackerResult> {
-        if (this.dropCampaign.find(it => it.id === campaignId) !== undefined) {
+        let selectedCustomCampaign = this.dropCampaign.find(it => it.campaign.id === campaignId)
+        if (selectedCustomCampaign !== undefined) {
             // campaign already in the list
+            if (!selectedCustomCampaign.reason.includes(ReasonTrack.Manual)) {
+                selectedCustomCampaign.reason.push(ReasonTrack.Manual)
+            }
+            
             return ITrackerResult.AlreadyExist
         }
         
@@ -375,7 +466,10 @@ export class Tracker {
         }
 
         // add campaign to list
-        this.dropCampaign.push(detailedCampaign[0])
+        this.dropCampaign.push({
+            reason: [ReasonTrack.Manual],
+            campaign: applyPriorityValue(detailedCampaign[0])
+        })
         return ITrackerResult.Successfully
     }
 
@@ -398,7 +492,17 @@ export class Tracker {
         // add campaigns
         let campaignIdToAdd = (await TW.getCampaigns()).filter(c => c.game.id === resGame[0].id).map(c => c.id)
         let detailedCampaign = await TW.getDetailedCampaign(campaignIdToAdd)
-        detailedCampaign.forEach(dc => this.dropCampaign.push(dc))
+        detailedCampaign.forEach(dc => {
+            let customCampaign = this.dropCampaign.find(cc => cc.campaign.id === dc.id)
+            if (customCampaign && !customCampaign.reason.includes(ReasonTrack.Game)) {
+                customCampaign.reason.push(ReasonTrack.Game)
+            }else {
+                this.dropCampaign.push({
+                    reason: [ReasonTrack.Game],
+                    campaign: applyPriorityValue(dc)
+                })
+            }
+        })
 
         return ITrackerResult.Successfully
     }
@@ -414,12 +518,24 @@ export class Tracker {
         switch (data.type) {
             case TargetPayload.Point:
                 state = await this.removeChannel(data.payload)
+                if (state === ITrackerResult.Successfully) {
+                    emitUpdate(UpdateType.TRACK_CHANNEL)
+                }
+
                 break
             case TargetPayload.Campaign:
                 state = await this.removeCampaign(data.payload)
+                if (state === ITrackerResult.Successfully) {
+                    emitUpdate(UpdateType.TRACK_CAMPAIGN)
+                }
+
                 break
             case TargetPayload.Game:
                 state = await this.removeGame(data.payload)
+                if (state === ITrackerResult.Successfully) {
+                    emitUpdate(UpdateType.TRACK_GAME)
+                }
+
                 break
         }
 
@@ -448,11 +564,14 @@ export class Tracker {
 
     @mutex(resourcesMutex)
     private static async removeCampaign(campaignId: string): Promise<ITrackerResult> {
-        let idxCampaign = this.dropCampaign.findIndex(it => it.id === campaignId)
+        let idxCampaign = this.dropCampaign.findIndex(cc => cc.campaign.id === campaignId)
         if (idxCampaign > -1) {
             // remove campaign
-            this.dropCampaign.splice(idxCampaign, 1)
-
+            this.dropCampaign[idxCampaign].reason = this.dropCampaign[idxCampaign].reason.filter(r => r !== ReasonTrack.Manual)
+            if (this.dropCampaign[idxCampaign].reason.length === 0) {
+                this.dropCampaign.splice(idxCampaign, 1)
+            }
+            
             return ITrackerResult.Successfully
         }
 
@@ -468,7 +587,19 @@ export class Tracker {
             let removed = this.trackingGame.splice(idxGame, 1)
             if (removed.length > 0) {
                 // remove all linked campaign
-                this.dropCampaign.filter(c => c.game.id === removed[0].id).forEach(c => this.removeCampaign(c.id))
+                let idxToSplice: number[] = []
+                this.dropCampaign.forEach((cc, idx) => {
+                    if (cc.campaign.game.id === removed[0].id) {
+                        cc.reason = cc.reason.filter(r => r !== ReasonTrack.Game)
+                        if (cc.reason.length === 0) {
+                            idxToSplice.push(idx)
+                        }
+                    }
+                })
+
+                for (let idx of idxToSplice) {
+                    this.dropCampaign.splice(idx, 1)
+                }
             }
 
             return ITrackerResult.Successfully
@@ -481,13 +612,12 @@ export class Tracker {
     /*
         GET
     */
-
     public static get getPointChannels(): IChannelExtended[] {
         return this.pointChannels
     }
 
-    public static get getDropCampaign(): IDetailedCampaign[] {
-        return this.dropCampaign
+    public static get getDropCampaign(): IDetailedCampaignPrioritize[] {
+        return this.dropCampaign.map(cc => cc.campaign)
     }
 
     public static get getTrackingGame(): IGame[] {

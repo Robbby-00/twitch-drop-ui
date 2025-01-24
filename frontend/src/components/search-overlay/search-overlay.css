@@ -88,23 +88,6 @@
     100% {clip-path:polygon(50% 50%,0 0,100% 0,100% 100%,0 100%,0 0)}
 }
 
-.search-overlay > .container-results >.loader {
+.search-overlay > .container-results > .loader-spinner {
     margin-top: 16px;
-
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    position: relative;
-    animation: rotate 1s linear infinite;
-    opacity: .5;
-}
-
-.search-overlay > .container-results >.loader::before {
-    content: "";
-    box-sizing: border-box;
-    position: absolute;
-    inset: 0px;
-    border-radius: 50%;
-    border: 5px solid #FFF;
-    animation: prixClipFix 2s linear infinite;
 }

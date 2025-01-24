@@ -6,9 +6,9 @@ import { useDebounce } from "../../hooks/debounce";
 
 type PositionType = "left" | "right" | "bottom" | "top"
 
-export function Tooltip(props: { children: ReactNode, content: string | JSX.Element, position?: PositionType }) {
+export function Tooltip(props: { children: ReactNode, content: string | JSX.Element, position?: PositionType, className?: string }) {
     
-    const { children, content, position } = props
+    const { children, content, position, className } = props
 
     const [ isVisible, setIsVisible ] = useState<boolean>(false)
     const { debounceValue } = useDebounce<boolean>(isVisible, 150)
@@ -20,7 +20,7 @@ export function Tooltip(props: { children: ReactNode, content: string | JSX.Elem
     >
         { children }
         <div 
-            className="tooltip" 
+            className={`tooltip ${className ?? ""}`}
             data-isvisible={debounceValue} 
             data-position={position ?? "bottom"}
             onMouseEnter={() => setIsVisible(true)}

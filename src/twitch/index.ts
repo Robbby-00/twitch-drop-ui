@@ -89,6 +89,7 @@ export class Twitch {
         let userData: IUser = {
             id: -1,
             displayName: "",
+            login: "",
             profileImage: ""
         }
 
@@ -96,6 +97,7 @@ export class Twitch {
         if (resp) {
             userData.id = resp[0]['data']['currentUser']['id']
             userData.displayName = resp[0]['data']['currentUser']['displayName']
+            userData.login = resp[0]['data']['currentUser']['login']
             userData.profileImage = resp[1]['data']['currentUser']['profileImageURL']
         }
 
@@ -119,7 +121,7 @@ export class Twitch {
             let rawFollowedChannels = (resp['data']['personalSections'] as any[]).find(it => it['type'] === "RECS_FOLLOWED_SECTION")
 
             if (rawFollowedChannels) {
-                return (rawFollowedChannels['items'] as any[]).map(item => ({
+                return (rawFollowedChannels['items'] as any[]).filter(it => it['user'] !== null).map(item => ({
                     id: Number(item['user']['id']),
                     name: item['user']['displayName'],
                     profileImage: item['user']['profileImageURL'],

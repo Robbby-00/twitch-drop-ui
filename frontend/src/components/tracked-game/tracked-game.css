@@ -4,7 +4,8 @@
     padding: 12px 32px;
     margin: 0 1%;
     
-    background-color: rgba(var(--font-rgb), .1);
+    box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 12px;
+    background-color: var(--background-soft-hex);
     border-radius: 8px;
 
     display: flex;

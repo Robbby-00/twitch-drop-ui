@@ -4,7 +4,8 @@
     padding: 12px 32px;
     margin: 0 1%;
     
-    background-color: rgba(var(--font-rgb), .1);
+    box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 12px;
+    background-color: var(--background-soft-hex);
     border-radius: 8px;
 
     display: flex;
@@ -59,50 +60,6 @@
     color: var(--primary-hex);
 }
 
-.container-tracked-campaign > .header > .info > .container-data > .name .tooltip {
-    height: 42px;
-    background-color: var(--background-soft-hex);
-    border: 2px solid rgba(var(--font-rgb), .2);
-}
-
-.container-tracked-campaign > .header > .info > .container-data > .name .tooltip > .content {
-    max-width: 300px;
-    height: 100%;
-    padding: 0 48px 0 12px;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 24px;
-}
-
-.container-tracked-campaign > .header > .info > .container-data > .name .tooltip > .content > .profile-image {
-    width: 32px;
-    height: 32px;
-}
-
-.container-tracked-campaign > .header > .info > .container-data > .name .tooltip > .content > .profile-image > .live-badge {
-    font-size: 10px;
-}
-
-.container-tracked-campaign > .header > .info > .container-data > .name .tooltip > .content > a {
-    text-decoration: none;
-}
-
-.container-tracked-campaign > .header > .info > .container-data > .name .tooltip > .content > a > .name {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--font-hex);
-    letter-spacing: .4px;
-    text-decoration: none;
-    white-space: nowrap;
-}
-
-.container-tracked-campaign > .header > .info > .container-data > .name .tooltip > .content > a:hover > .name {
-    color: var(--primary-hex);
-    text-decoration: underline;
-}
-
 .container-tracked-campaign > .header > .info > .container-data > .tags {
     display: flex;
     align-items: center;
@@ -112,15 +69,21 @@
 .container-tracked-campaign > .header > .info > .container-data > .tags > .tag {
     display: flex;
     align-items: center;
+    box-sizing: border-box;
+    height: 21px;
 
     font-size: 15px;
     font-weight: 500;
     letter-spacing: .4px;
 }
 
-.container-tracked-campaign > .header > .info > .container-data > .tags > .tag.status > .container {
-    padding: 3px 8px;
+.container-tracked-campaign > .header > .info > .container-data > .tags > .tag > .container {
+    height: 100%;
+    padding: 0 8px;
 
+    display: flex;
+    justify-content: center;
+    align-items: center;
     border-radius: 4px;
     font-size: 12px;
     text-transform: capitalize;
@@ -135,12 +98,7 @@
 }
 
 .container-tracked-campaign > .header > .info > .container-data > .tags > .tag.expired > .container {
-    padding: 3px 8px;
-
-    border-radius: 4px;
     background-color: rgba(var(--font-rgb), .2);
-    font-size: 12px;
-    text-transform: capitalize;
 }
 
 .container-tracked-campaign > .header > .info > .container-data > .tags > .tag.expired > .container > .text {
@@ -149,14 +107,47 @@
     opacity: .7;
 }
 
+.container-tracked-campaign > .header > .info > .container-data > .tags > .tag.account {
+    box-sizing: border-box;
+    padding: 0 8px;
+    gap: 6px;
+
+    box-shadow: none;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.container-tracked-campaign > .header > .info > .container-data > .tags > .tag.account > svg {
+    height: 10px;
+}
+
 .container-tracked-campaign > .header > .right-side {
     display: flex;
     align-items: center;
     gap: 24px;
 }
 
-.container-tracked-campaign > .header > .right-side > .account-link {
+.container-tracked-campaign > .header > .right-side > .drop-recap {
+    display: flex;
+    justify-content: center;
+    align-items: self-end;
+    gap: 2px;
+}
 
+.container-tracked-campaign > .header > .right-side > .drop-recap > .current {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.container-tracked-campaign > .header > .right-side > .drop-recap > .total {
+    font-size: 15px;
+    font-weight: 600;
+    opacity: .7;
+}
+
+.container-tracked-campaign > .header > .right-side > .drop-recap > svg {
+    font-size: 28px;
+    color: var(--green-hex);
 }
 
 .container-tracked-campaign > .header > .right-side > .expand-btn {
@@ -181,17 +172,18 @@
 /*
     EDIT MODE
 */
-.container-tracked-campaign > .header > .edits-button {
+.container-tracked-campaign > .header > .right-side > .edits-button {
     display: flex;
     gap: 12px;
 }
 
-.container-tracked-campaign > .header > .edits-button > .button {
+.container-tracked-campaign > .header > .right-side > .edits-button > .button {
     padding: 0 16px;
     color: rgba(var(--background-button-rgb), .8);
 }
 
-.container-tracked-campaign > .header > .edits-button > .button.remove {
+
+.container-tracked-campaign > .header > .right-side > .edits-button > .button.remove {
     --background-button-rgb: var(--red-rgb);
 }
 

@@ -18,7 +18,7 @@ import {
 
 import { IClientInfo, IClientType } from "./client";
 
-import { ICampaign, IRawCampaign, IDetailedCampaign } from "./campaign";
+import { ICampaign, IRawCampaign, IDetailedCampaign, IDetailedCampaignPrioritize } from "./campaign";
 
 import { IUser } from "./user";
 
@@ -54,6 +54,7 @@ export {
     IClientType,
     ICampaign,
     IDetailedCampaign,
+    IDetailedCampaignPrioritize,
     IRawCampaign,
     IUser,
     IChannel,

@@ -73,7 +73,7 @@
 }
 
 .container-drop[data-claimed="true"] > .container-image {
-    -webkit-mask-position-x: 100%;
+    -webkit-mask-position-x: 0%;
 }
 
 .container-drop > .container-image > img {

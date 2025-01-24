@@ -1,4 +1,46 @@
-:root {
+body, #root, .App {
+  box-sizing: border-box;
+  margin: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+
+  font-family: "Inter", serif;
+  color: var(--font-hex);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+}
+
+.App[data-theme="light"] {
+  /* COLORS HEX */
+  --background-hex: #f7f7f8;
+  --background-soft-hex: #ffffff;
+  --background-base-hex: #ffffff;
+  --font-hex: #0e0e10;
+  --primary-hex: #A970FF;
+  --red-hex: #FF453A;
+  --green-hex: #30D158;
+  --orange-hex: #ff9500;
+  --yellow-hex: #ffd60a;
+  --blue-hex: #2094fa;
+  --code-hex: #d79a4b;
+
+  /* COLORS RGB */
+  --background-rgb: 247, 247, 248;
+  --background-soft-rgb: 255, 255, 255;
+  --background-base-rgb: 255, 255, 255;
+  --font-rgb: 14, 14, 16;
+  --primary-rgb: 169, 112, 255;
+  --red-rgb: 255, 69, 58;
+  --green-rgb: 48, 209, 88;
+  --orange-rgb: 255, 149, 0;
+  --yellow-rgb: 255, 214, 10;
+  --blue-rgb: 32, 148, 250;
+  --code-rgb: 215, 154, 75;
+}
+
+.App[data-theme="dark"] {
   /* COLORS HEX */
   --background-hex: #0E0E10;
   --background-soft-hex: #1F1F23;
@@ -9,6 +51,8 @@
   --green-hex: #30D158;
   --orange-hex: #ff9500;
   --yellow-hex: #ffd60a;
+  --blue-hex: #2094fa;
+  --code-hex: #d79a4b;
 
   /* COLORS RGB */
   --background-rgb: 14, 14, 16;
@@ -20,29 +64,16 @@
   --green-rgb: 48, 209, 88;
   --orange-rgb: 255, 149, 0;
   --yellow-rgb: 255, 214, 10;
-}
-
-body, #root, .App {
-  margin: 0;
-  width: 100%;
-  height: 100vh;
-  background-color: var(--background-hex);
-  overflow: hidden;
-
-  font-family: "Inter", serif;
-  color: var(--font-hex);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  user-select: none;
+  --blue-rgb: 32, 148, 250;
+  --code-rgb: 215, 154, 75;
 }
 
 .App {
-  width: 88%;
-  height: calc(100% - 96px);
+  padding: 48px 6%;
 
+  background-color: var(--background-hex);
   display: flex;
   flex-direction: column;
-  margin: 48px 6%;
   gap: 48px;
 }
 
@@ -58,5 +89,25 @@ a:visited {
   fill: var(--primary-hex);
 }
 .fDFkyX {
-  fill: var(--font-hex);
+  fill: var(--background-soft-hex);
+}
+
+/*
+  SCROLLBAR
+*/
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(var(--font-rgb), .2);
+  border-radius: 64px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(var(--font-rgb), .25);
 }

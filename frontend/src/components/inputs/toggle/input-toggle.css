@@ -1,0 +1,38 @@
+.container-toggle.input-custom {
+    position: relative;
+
+    width: 52px;
+    border-radius: 64px;
+    background-color: transparent;
+    cursor: pointer;
+
+    will-change: border, background-color;
+    transition: border .3s ease, background-color .3s ease;
+}
+
+.container-toggle.input-custom > .handle {
+    position: absolute;
+    top: 50%;
+    left: 1.8px;
+    height: 22px;
+    aspect-ratio: 1 / 1;
+
+    border-radius: inherit;
+    background-color: rgba(var(--font-rgb), .8);
+    transform: translateY(-50%);
+
+    will-change: left, background-color;
+    transition: left .3s ease, background-color .3s ease;
+}
+
+.container-toggle.input-custom:hover > .handle {
+    background-color: rgba(var(--font-rgb), 1);
+}
+
+.container-toggle.input-custom[data-toggle="true"] {
+    background-color: var(--primary-hex);
+}
+
+.container-toggle.input-custom[data-toggle="true"] > .handle {
+    left: 27.2px;
+}

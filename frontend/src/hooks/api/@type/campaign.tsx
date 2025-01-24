@@ -21,4 +21,5 @@ export interface ICampaign {
         isAccountConnected: boolean
     }
     drops: IDrop[]
+    priority: number
 }

@@ -1,12 +1,10 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
 
 // context
 import { DataContext } from "../../context/data";
 
 // components
-import { Tooltip } from "../tooltip";
-import { ProfileImage } from "../profile-image";
 import { Button, ButtonStyle } from "../button";
 
 // @types
@@ -18,11 +16,12 @@ import { formatDateTime } from "../../utils";
 
 // icon
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown, faEye, faShareFromSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faCheckCircle, faChevronDown, faShareFromSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
 
 // style
 import "./tracked-campaign.css"
 import { Drop } from "../drops";
+import { WatchingTooltip } from "../tooltip/watching-tooltip";
 
 export function TrackedCampaign(props: { campaign: ICampaign, editMode: boolean, onDelete?: () => void }) {
 
@@ -38,6 +37,25 @@ export function TrackedCampaign(props: { campaign: ICampaign, editMode: boolean,
     // state
     const [ watching, setWatching ] = useState<IChannelExtended | undefined>(undefined)
     const [ expanded, setExpanded ] = useState<boolean>(false)
+    const [ currentDrop, setCurrentDrop ] = useState<number>(0)
+    const [ totalDrop, setTotalDrop ] = useState<number>(0)
+
+    // ref
+    const containerRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        let totalDrop = 0
+        let currentDrop = 0
+        for (let drop of campaign.drops) {
+            totalDrop += drop.benefits.length
+            if (drop.isClaimed) {
+                currentDrop += drop.benefits.length
+            }
+        }
+
+        setTotalDrop(totalDrop)
+        setCurrentDrop(currentDrop)
+    }, [campaign])
 
     useEffect(() => {
         let channelWatching = watchingChannel.find(ch => ch.campaign.some(c => c.id === campaign.id))?.channel
@@ -45,7 +63,19 @@ export function TrackedCampaign(props: { campaign: ICampaign, editMode: boolean,
     }, [campaign, watchingChannel])
 
     useEffect(() => {
-        setExpanded(location.hash === `#${campaign.id}`)
+        if (location.hash === `#${campaign.id}`) {
+            setExpanded(true)
+
+            if (!expanded) {
+                // auto scroll to center
+                setTimeout(() => {
+                    containerRef.current?.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    })
+                }, 300)
+            }
+        }else setExpanded(false)
     }, [campaign, location])
 
     const handleToggleExpanded = () => {
@@ -54,33 +84,20 @@ export function TrackedCampaign(props: { campaign: ICampaign, editMode: boolean,
         }else naviagate(`${location.pathname}`)
     }
 
-    const renderWatchedChannel = () => {
-        let watch = watching as IChannelExtended
-
-        return <div className="content">
-            <ProfileImage profileImage={watch.profileImage} isLive={watch.stream !== undefined}/>
-            <a href={`https://www.twitch.tv/${watch.login}`} target="_blank">
-                <span className="name">{watch.displayName}</span>
-            </a>
-        </div>
-    }
-
     const renderEditsButton = () => {
         return <div className="edits-button">
             <Button style={ButtonStyle.EMPTY} classname="remove" icon={faTrash} onClick={onDelete}/>
         </div>
     }
 
-    return <div className="container-tracked-campaign" data-expanded={expanded}>
+    return <div ref={containerRef} className="container-tracked-campaign" data-expanded={expanded}>
         <div className="header">
             <div className="info">
                 <img className="box-art" src={campaign.game.boxArtURL} />
                 <div className="container-data">
                     <div className="name">
                         {campaign.name}
-                        {watching ? <Tooltip content={renderWatchedChannel()} position="right">
-                            <FontAwesomeIcon icon={faEye} />
-                        </Tooltip> : null}
+                        {watching ? <WatchingTooltip channel={watching} /> : null}
                     </div>
                     <div className="tags">
                         <div className="tag game">
@@ -89,6 +106,10 @@ export function TrackedCampaign(props: { campaign: ICampaign, editMode: boolean,
                         <div className="tag status">
                             <div className="container" data-status={campaign.status}>{campaign.status.toLowerCase()}</div>
                         </div>
+                        { campaign.self.isAccountConnected ? 
+                            <Button classname="tag account" style={ButtonStyle.FILL} text={"Connected"} clickable={false} /> :
+                            <Button classname="tag account" style={ButtonStyle.EMPTY} text={"Connect"} icon={faShareFromSquare} onClick={() => window.open(campaign.accountLinkURL, "_blank")}/>  
+                        }
                         <div className="tag expired">
                             <div className="container">
                                 <span className="text">Expire:</span>
@@ -99,10 +120,12 @@ export function TrackedCampaign(props: { campaign: ICampaign, editMode: boolean,
                 </div>
             </div>
             <div className="right-side">
-                { campaign.self.isAccountConnected ? 
-                    <Button style={ButtonStyle.FILL} text={"Connected"} clickable={false} /> :
-                    <Button style={ButtonStyle.EMPTY} text={"Connect"} icon={faShareFromSquare} onClick={() => window.open(campaign.accountLinkURL, "_blank")}/>  
-                }
+                <div className="drop-recap">
+                    { currentDrop !== totalDrop ? <>
+                        <span className="current">{currentDrop}</span>
+                        <span className="total">{`/${totalDrop}`}</span>
+                    </> : <FontAwesomeIcon icon={faCheckCircle} />}
+                </div>
                 { editMode ? renderEditsButton() : <div className="expand-btn" onClick={handleToggleExpanded}>
                     <FontAwesomeIcon icon={faChevronDown} />
                 </div> }
